@@ -10,7 +10,7 @@ knowhow-shell is an interpreter that runs script based jobs with a full tty.  Wh
       }
     }
 
-This will send the string $GIT_PASSWORD to the terminal when prompted with a string that matches 'password:'
+This will send the string $GIT_PASSWORD to the terminal when prompted with a string that matches 'password'.
 
 # Usage
 
