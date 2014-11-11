@@ -41,7 +41,7 @@ Define a job and use the execute job method.  The following events are exposed: 
     ]
     }
     };
-    var KnowhowShell = require('../knowhow-shell.js');
+    var KnowhowShell = require('knowhow-shell.js');
     var knowhowShell = new KnowhowShell();
     knowhowShell.on('command-complete', function(command) {
      console.log('command: '+command.command);
