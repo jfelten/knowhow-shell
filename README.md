@@ -30,9 +30,6 @@ Define a job and use the execute job method.  The following events are exposed: 
     },
     commands: [
      {
-      command: 'cd asdas'
-     },
-     {
       command: 'rm -rf ${CHECKOUT_DIR}'
      },
      {
