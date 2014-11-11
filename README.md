@@ -60,7 +60,6 @@ Define a job and use the execute job method.  The following events are exposed: 
     knowhowShell.on('job-update', function(job) {
      console.log(job.id +' progress '+job.progress);
     });
-    
     knowhowShell.executeJob(cloneRepoJob);
 
 
