@@ -1,0 +1,35 @@
+{
+  "name": "knowhow-shell",
+  "version": "0.0.0",
+  "description": "An interpretter to run knowhow jobs",
+  "main": "knowhow-shell.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jfelten/knowhow-shell.git"
+  },
+  "keywords": [
+    "expect",
+    "tty",
+    "tty.js",
+    "shell",
+    "script",
+    "interpreter"
+  ],
+  "author": "John Felten <john@zenzic.com> (https://github.com/jfelten/knowhow)",
+  "license": "GPL-3.0+",
+  "bugs": {
+    "url": "https://github.com/jfelten/knowhow-shell/issues"
+  },
+  "homepage": "https://github.com/jfelten/knowhow-shell",
+  "dependencies": {
+    "async": "^0.9.0",
+    "pty.js": "^0.2.4",
+    "events": "^1.0.2"
+  }
+}
