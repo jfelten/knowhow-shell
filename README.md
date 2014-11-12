@@ -14,7 +14,7 @@ This will send the string $GIT_PASSWORD to the terminal when prompted with a str
 
 # Installation
 
-    npm install -g knowhow-shell
+    npm install knowhow-shell
 
 # Usage
 
