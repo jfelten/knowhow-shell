@@ -70,7 +70,6 @@ npmInitJob = {
   "files": [],
 	script: {
 		"env": {
-			NODE_NO_READLINE: "1",
 			PATH: '/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin',
 			PROJECT_DIR: '${working_dir}/npmTest',
       		NAME: 'knowhow_project',
@@ -84,9 +83,6 @@ npmInitJob = {
       		LICENSE: 'GPL-3.0+'	
     	},
 		commands: [
-			{
-		    	command: 'export NODE_NO_READLINE'
-		    },
 		    {
 		    	command: 'rm -rf $PROJECT_DIR'
 		    },
