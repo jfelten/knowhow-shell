@@ -35,7 +35,7 @@ var executeJob = function(job, callback) {
 	var currentCommand;	
 	term.on('data', function(data) {
 		if (data) {
-	  	  //console.log(data);
+	  	  console.log(data);
 	  	  output=data.split(retCodeRE)[0];
 	  	  if (output) {
 	  	  	scriptRuntime.output+=output
@@ -146,6 +146,7 @@ var setEnv = function(job) {
 
 	
 	replaceVar = function(regEx,varName, searchString) {
+		try {
 		    var iteration=0;
 		    var replacedString = searchString;
 			while( res = regEx.exec(replacedString) ){
@@ -155,39 +156,50 @@ var setEnv = function(job) {
 			    	//console.log("replaceVal="+replaceVal+" value="+value);
 			    	replacedString=searchString.replace(replaceVal,value);
 			      }
-			      var otherMatches = regEx.exec(job.script.env[varName]);
+			      var otherMatches = replacedString.match(regEx);
+			      console.log(otherMatches);
 			      for (index in otherMatches)
 			      {
 			      	var envVariable = otherMatches[index].replace('\${','').replace('}','');
 			 		//console.log("replacing value: "+envVariable);
-			      	job.script.env[varName] = replaceVar(regEx, envVariable, job.script.env[envVariable]);
+			      	replacedString = replaceVar(regEx, envVariable, replacedString);
+
 			      }
+			      
 			}
 			//console.log("converted: "+searchString+" to: "+replacedString+" using: "+regEx);
 			return replacedString;
-			
-		};
+		
+		} catch (err) {
+			console.log("invalid substituion "+varName+" in "+searchString);
+			console.log(err.message);
+		}	
+	};
 
 	for (envVar in job.script.env) {
-	    var envVarValue = job.script.env[envVar];
-	    //replace env_var references in values
-	    
-		
-		var dollarRE = /\$\w+/g;
-		var dollarBracketRE = /\${\w*}/g;
-		for (variable in job.script.env) {
-			job.script.env[variable] = replaceVar(dollarRE,variable,job.script.env[variable]);
-			job.script.env[variable] = replaceVar(dollarBracketRE,variable,job.script.env[variable]);
-			//console.log(variable+'='+job.script.env[variable])
-		}
-		
-		for (commandIndex in job.script.commands) {
-			var command = job.script.commands[commandIndex];
-			for (response in command.responses) {
-				command.responses[response] =  replaceVar(dollarRE,variable,command.responses[response]);
-				command.responses[response] =  replaceVar(dollarBracketRE,variable,command.responses[response]);
-				//console.log('repsonse: '+response+'='+command.responses[response]);
+		try {
+		    var envVarValue = job.script.env[envVar];
+		    //replace env_var references in values
+		    
+			
+			var dollarRE = /\$\w+/g;
+			var dollarBracketRE = /\${\w*}/g;
+			for (variable in job.script.env) {
+				job.script.env[variable] = replaceVar(dollarRE,variable,job.script.env[variable]);
+				job.script.env[variable] = replaceVar(dollarBracketRE,variable,job.script.env[variable]);
+				//console.log(variable+'='+job.script.env[variable])
 			}
+			
+			for (commandIndex in job.script.commands) {
+				var command = job.script.commands[commandIndex];
+				for (response in command.responses) {
+					command.responses[response] =  replaceVar(dollarRE,variable,command.responses[response]);
+					command.responses[response] =  replaceVar(dollarBracketRE,variable,command.responses[response]);
+					//console.log('repsonse: '+response+'='+command.responses[response]);
+				}
+			}
+		} catch (err) {
+			console.log("unable to set: "+envVar+"="+job.script.env[envVar]);
 		}
 	
 		//logger.info(envVar+'='+envVars[envVar]);
