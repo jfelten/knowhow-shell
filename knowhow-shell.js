@@ -52,6 +52,9 @@ var executeJob = function(job, callback) {
 		  }
 		  
 		  if (data.match(retCodeRE)) {
+		  	job.progress=scriptRuntime.currentStep*scriptRuntime.progressStepLength;
+		  	job.status = 'completed: '+scriptRuntime.currentCommand.command;
+		  	eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
 		  	
 		  	scriptRuntime.currentCommand.returnCode = data.match(retCodeRE)[0].split(":")[1];
 		  	//console.log('return code: '+scriptRuntime.currentCommand.returnCode);
@@ -62,9 +65,7 @@ var executeJob = function(job, callback) {
 		  		eventEmitter.emit('execution-complete', scriptRuntime.currentCommand);
 		  		scriptRuntime.currentCommand.callback();
 		  	}
-		  	job.progress=scriptRuntime.currentStep*scriptRuntime.progressStepLength;
-		  	job.status = 'completed: '+scriptRuntime.currentCommand
-		  	eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
+		  	
 		  }
 		}
 	  
@@ -107,6 +108,8 @@ var executeJob = function(job, callback) {
 			job.progress=0;
 			job.status=job.id+" complete";
 			eventEmitter.emit("job-complete", job);
+			
+			
 			delete scriptRuntime.currentCommand;
 			clearInterval(progressCheck);
 	        //logger.info("done");
@@ -193,8 +196,10 @@ var setEnv = function(job) {
 	}
  };
 
-function KnowhowShell() {
-
+function KnowhowShell(passedInEmitter) {
+	if (passedInEmitter) {
+		eventEmitter = passedInEmitter;
+	}
 }
 
 KnowhowShell.prototype.cancelJob = cancelJob;
