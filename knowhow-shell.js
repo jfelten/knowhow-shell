@@ -4,13 +4,18 @@ var process = require('process');
 var EventEmitter = require('events').EventEmitter;
 var eventEmitter = new EventEmitter();
 
-var retCodeRE = /ret code:\d+/;
+var knowhowShellPrompt= '~~KHshell~~';
+var knowhowShellPromptCommand='\'echo "#ret-code:$?"\'';
+var retCodeRE = /\#ret-code:\d+/;
+var proptRE = /~~KHshell~~/;
+//var proptRE = new RegExp(knowhowShellPrompt);
 
 var jobsInProgress = {};
 
 var cancelJob = function(job) {
-	if (jobsInProgress[job.id] && jobsInProgress[job.id].term) {
+	if (job && job.id && jobsInProgress[job.id] && jobsInProgress[job.id].term) {
 		jobsInProgress[job.id].term.exit();
+		clearInterval(progressCheck);
 		delete jobsInProgress[job.id];
 	}	
 };
@@ -22,8 +27,52 @@ var executeJob = function(job, callback) {
 		output: '',
 		progressStepLength: Math.floor(100/job.script.commands.length)
 	};
+	var shell="bash";
+	var args = [];
+	var newCommands1 = new Array(job.script.commands.length+2);
+	newCommands1[0] ={
+		"command" : "PS1="+knowhowShellPrompt+"; PROMPT_COMMAND="+knowhowShellPromptCommand
+	};
+	newCommands1[1] = {};
+	for (env in job.script.env) {
+		if (env && env != '' && job.script.env[env] && job.script.env[env] !='') {
+			newCommands1[1].command+=env+'=\"'+job.script.env[env]+"\"";
+			if (newCommands1[1].command.slice(-1)!=';') {
+				newCommands1[1].command+='; ';
+			}
+		}
+	}
+	for (index = 0; index < job.script.commands.length; index++) {
+		newCommands1[index+2]=job.script.commands[index];
+	}
+	job.script.commands = newCommands1;
+	if (job.shell) {
+		shell=job.shell.command;
+		if (job.shell.args) {
+			args = job.shell.args;
+		}
+		
+		job.script.commands = newCommands1;
+		if (job.shell.waitForPrompt) {
+			job.shell.responses[job.shell.waitForPrompt] = "#ret-code:0";
+		}
+		if (job.shell.responses) {
+			//job.shell.responses['#']="PS1="+knowhowShellPrompt+";";
+			//job.shell.responses['_']="PS1="+knowhowShellPrompt+";";
+			var responseCommand = {};
+			responseCommand.responses = job.shell.responses;
+			newCommands = new Array(job.script.commands.length+1);
+			newCommands[0] = responseCommand;
+			for (index = 0; index < job.script.commands.length; index++) {
+				console.log(index+" "+job.script.commands[index].command);
+				newCommands[index+1]=job.script.commands[index];
+			}
+			job.script.commands = newCommands;
+		}
+		
+	}
 	
-	var term = pty.spawn('bash', [], {
+	var term = pty.spawn( shell, args, {
 	  name: 'xterm-color',
 	  cols: 80,
 	  rows: 30,
@@ -31,40 +80,60 @@ var executeJob = function(job, callback) {
 	  env: job.script.env
 	});
 	
+	jobsInProgress[job.id] = job;
+	jobsInProgress[job.id].term = term;
 	console.log(term.process);
 	var currentCommand;	
 	term.on('data', function(data) {
+		
 		if (data) {
-	  	  console.log(data);
-	  	  output=data.split(retCodeRE)[0];
-	  	  if (output) {
-	  	  	scriptRuntime.output+=output
-	  	  	scriptRuntime.currentCommand.output+=output;
-	  	  }
+			//if (scriptRuntime.currentCommand) {
+		  		process.stdout.write(data);
+		  	//}
+		  //output=data.split(retCodeRE)[0];
+		   //process.stdout.write("o:^"+data+"o:$");
+	  	  //if (output) {
+	  	  	scriptRuntime.output+=data;
+	  	  	scriptRuntime.currentCommand.output+=data;
+	  	  //}
+	  	  
+	  	  //console.log("responses="+scriptRuntime.currentCommand.responses);
 		  if (scriptRuntime.currentCommand.responses) {
 		  	for (response in scriptRuntime.currentCommand.responses) {
 		  		var re = new RegExp(response,"g");
 		  		if (data.match(response)) {
 		  			//console.log("response: "+response+" "+scriptRuntime.currentCommand.responses[response]);
 		  			term.write(scriptRuntime.currentCommand.responses[response]+"\r");
+		  			delete scriptRuntime.currentCommand.responses[response];
 		  		}
 		  	}
 		  }
 		  
-		  if (data.match(retCodeRE)) {
+		  
+		  //console.log('detect prompt');
+		  //console.log(data.match(proptRE));
+		  if (data.match(proptRE)) {
+		  	//console.log("completed: "+scriptRuntime.currentCommand.command);
+		  	//scriptRuntime.currentCommand.callback();
+		  }
+		  if (scriptRuntime.currentCommand.output.match(retCodeRE)) {
 		  	job.progress=scriptRuntime.currentStep*scriptRuntime.progressStepLength;
 		  	job.status = 'completed: '+scriptRuntime.currentCommand.command;
 		  	eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
 		  	
-		  	scriptRuntime.currentCommand.returnCode = data.match(retCodeRE)[0].split(":")[1];
+		  	scriptRuntime.currentCommand.returnCode = scriptRuntime.currentCommand.output.match(retCodeRE)[0].split(":")[1];
+		  	scriptRuntime.currentCommand.output=scriptRuntime.currentCommand.output.replace(knowhowShellPrompt,"")
+		  		.replace(retCodeRE,"").replace(scriptRuntime.currentCommand.command,"").trim();
 		  	//console.log('return code: '+scriptRuntime.currentCommand.returnCode);
 		  	if (scriptRuntime.currentCommand.returnCode != 0) {
 		  		eventEmitter.emit('execution-error',scriptRuntime.currentCommand);
 		  		scriptRuntime.currentCommand.callback(new Error(scriptRuntime.currentCommand.output));
 		  	} else {
 		  		eventEmitter.emit('execution-complete', scriptRuntime.currentCommand);
-		  		scriptRuntime.currentCommand.callback();
+		  		
 		  	}
+		  	console.log("completed: "+scriptRuntime.currentCommand.command);
+		  	scriptRuntime.currentCommand.callback();
 		  	
 		  }
 		}
@@ -74,6 +143,7 @@ var executeJob = function(job, callback) {
 		//console.log(err.message);
 		clearInterval(progressCheck);
 		term.end();
+		delete scriptRuntime.currentCommand;
 		if (callback) {
 			callback(err, scriptRuntime);
 		}
@@ -90,7 +160,9 @@ var executeJob = function(job, callback) {
 		command.callback = callback;
 		command.output = '';
 		scriptRuntime.currentCommand = command;
-		term.write(command.command+'; echo "ret code:"$?\r');
+		if (command.command) {
+			term.write(command.command+'\r');
+		}
 		//term.write("wait | echo \"D_O_N_E: "+currentCommand.command+'\r');
 	    }.bind({scriptRuntime: scriptRuntime}), 
 	    function(err) {
@@ -111,6 +183,7 @@ var executeJob = function(job, callback) {
 			
 			
 			delete scriptRuntime.currentCommand;
+			delete jobsInProgress[job.id];
 			clearInterval(progressCheck);
 	        //logger.info("done");
 	    	term.end();
@@ -136,38 +209,52 @@ var setEnv = function(job) {
  	} else {
  		job.script.env["working_dir"]='./';
  	}
+	//job.script.env.PS1=knowhowShellPrompt;
+	//job.script.env.PROMPT_COMMAND=knowhowShellPromptCommand;
 	
 	//add the process.env to job.env
-	for (envVar in process.env) {
-		if (!job.script.env[envVar]) {
-			job.script.env[envVar] = process.env[envVar];
-		}
-	}
+	//for (envVar in process.env) {
+	//	if (!job.script.env[envVar]) {
+	//		job.script.env[envVar] = process.env[envVar];
+	//	}
+	//}
 
 	
-	replaceVar = function(regEx,varName, searchString) {
+	replaceVar = function(regEx,varName, searchString, callback) {
 		try {
 		    var iteration=0;
 		    var replacedString = searchString;
-			while( res = regEx.exec(replacedString) ){
+		    //console.log("executing: "+regEx+" on "+replacedString);
+			var res = replacedString.match(regEx);
+			//console.log(res);
+			if (res && res != null) {
 				 for (i=0; i < res.length; i++) {
 			        var replaceVal = res[i];
 			    	var value = job.script.env[replaceVal.replace('\${','').replace('}','')];
 			    	//console.log("replaceVal="+replaceVal+" value="+value);
 			    	replacedString=searchString.replace(replaceVal,value);
+			    	//console.log("replacedString="+replacedString+" "+replaceVal);
 			      }
 			      var otherMatches = replacedString.match(regEx);
-			      console.log(otherMatches);
-			      for (index in otherMatches)
-			      {
-			      	var envVariable = otherMatches[index].replace('\${','').replace('}','');
-			 		//console.log("replacing value: "+envVariable);
-			      	replacedString = replaceVar(regEx, envVariable, replacedString);
-
-			      }
-			      
+			      //console.log(otherMatches);
+			      if (otherMatches && otherMatches !=null) {
+				      async.each(otherMatches, function(match) {
+				      	var envVariable = match.replace('\${','').replace('}','');
+				 		//console.log("replacing value: "+envVariable);
+				 		//console.log("replacing other match: "+replacedString+" "+envVariable);
+				      	replacedString = replaceVar(regEx, envVariable, replacedString);
+				      }, function(err) {
+				      	if(err) {
+				      		console.log(err.message);
+				      		console.log(err.stack);
+				      	}
+				      });
+				  }
 			}
-			//console.log("converted: "+searchString+" to: "+replacedString+" using: "+regEx);
+			//console.log("converted: "+searchString+" to: "+replacedString+" using: "+regEx+" var: "+varName);
+			if (callback) {
+				callback(replacedString);
+			}
 			return replacedString;
 		
 		} catch (err) {
@@ -176,35 +263,59 @@ var setEnv = function(job) {
 		}	
 	};
 
-	for (envVar in job.script.env) {
-		try {
-		    var envVarValue = job.script.env[envVar];
-		    //replace env_var references in values
-		    
-			
-			var dollarRE = /\$\w+/g;
-			var dollarBracketRE = /\${\w*}/g;
-			for (variable in job.script.env) {
-				job.script.env[variable] = replaceVar(dollarRE,variable,job.script.env[variable]);
-				job.script.env[variable] = replaceVar(dollarBracketRE,variable,job.script.env[variable]);
-				//console.log(variable+'='+job.script.env[variable])
-			}
-			
-			for (commandIndex in job.script.commands) {
-				var command = job.script.commands[commandIndex];
-				for (response in command.responses) {
-					command.responses[response] =  replaceVar(dollarRE,variable,command.responses[response]);
-					command.responses[response] =  replaceVar(dollarBracketRE,variable,command.responses[response]);
-					//console.log('repsonse: '+response+'='+command.responses[response]);
+	var dollarRE = /\$\w+/g;
+	var dollarBracketRE = /\${\w*}/g;
+	try {
+		variable = "USER";
+		for (variable in job.script.env) {
+			async.series([
+				
+				function(callback) {
+					job.script.env[variable] = replaceVar(dollarRE,variable,job.script.env[variable]);
+					job.script.env[variable] = replaceVar(dollarBracketRE,variable,job.script.env[variable]); 
+					callback();
+				}, function (callback) {
+					if (job.shell) {
+						for (index in job.shell.args) {
+							job.shell.args[index] = replaceVar(dollarRE,variable,job.shell.args[index]);
+							job.shell.args[index] = replaceVar(dollarBracketRE,variable,job.shell.args[index]);
+							
+							//console.log(variable+":"+job.shell.args[index]);
+						}
+						for (response in job.shell.responses) {  
+							job.shell.responses[response] = replaceVar(dollarRE,variable,job.shell.responses[response]);
+							job.shell.responses[response] = replaceVar(dollarBracketRE,variable,job.shell.responses[response]);
+						}
+						job.shell.waitForPrompt = replaceVar(dollarRE,variable,job.shell.waitForPrompt);
+						job.shell.waitForPrompt = replaceVar(dollarBracketRE,variable,job.shell.waitForPrompt);
+					}
+					callback();
+				}, function(callback) {
+					
+					for (commandIndex in job.script.commands) {
+						var command = job.script.commands[commandIndex];
+						for (response in command.responses) {
+							command.responses[response] =  replaceVar(dollarRE,variable,command.responses[response]);
+							command.responses[response] =  replaceVar(dollarBracketRE,variable,command.responses[response]);
+							//console.log('repsonse: '+response+'='+command.responses[response]);
+						}
+					}
+					callback();
 				}
-			}
-		} catch (err) {
-			console.log("unable to set: "+envVar+"="+job.script.env[envVar]);
+			], function(err) {
+					if (err) {
+						console.log(err.message);
+						console.log(err.stack);
+					}
+				}
+			);
+
+			
 		}
-	
-		//logger.info(envVar+'='+envVars[envVar]);
-		//env[envVar] = envVars[envVar];
 		
+	} catch (err) {
+		console.log("unable to set: "+variable+"="+job.script.env[variable]);
+		console.log(err.stack);
 	}
  };
 
@@ -217,6 +328,7 @@ function KnowhowShell(passedInEmitter) {
 KnowhowShell.prototype.cancelJob = cancelJob;
 KnowhowShell.prototype.executeJob = executeJob;
 KnowhowShell.eventEmitter = eventEmitter;
+KnowhowShell.jobsInProgress = jobsInProgress;
 KnowhowShell.prototype.addListener =
 KnowhowShell.prototype.on = function(type, func) {
 	eventEmitter.on(type, func);
