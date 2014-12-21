@@ -125,7 +125,7 @@ This is another example take from: [node-suppose](https://github.com/jprichardso
 
 ## A more interesting example - opening an SSH terminal
 
-By default knowhow-shell will open a host's bash shell, but it is possible to specify other programs like SSH. This is done by specifying the shell element.  This example job will open an ssh session to MY_USER@MY_HOST, login with MY_PASSWORD, and execute a couple commands.  To use change the values of MY_USER, MY_PASSWORD, and MY_HOST under job.script.env to your specific values.   Change job.shell.waitForPrompt if necessary to your system's prompt.  Specifying this value tells the shell to wait until login is complete before executing the script.
+By default knowhow-shell will open a host's bash shell, but it is possible to specify other programs like SSH. This is done by specifying the shell element.  This example job will open an ssh session to MY_USER@MY_HOST, login with MY_PASSWORD, and execute a couple commands.  To use change the values of MY_USER, MY_PASSWORD, and MY_HOST under job.script.env to your specific values.   Change job.shell.onConnect.waitForPrompt if necessary to your system's prompt.  Specifying this value tells the shell to wait until login is complete before executing the script.
 
     { 
         "id": "example ssh interactive shell",
