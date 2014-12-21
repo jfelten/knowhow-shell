@@ -53,16 +53,18 @@ var executeJob = function(job, callback) {
 		}
 		
 		job.script.commands = newCommands1;
-		if (job.shell.waitForPrompt) {
-			job.shell.responses[job.shell.waitForPrompt] = "#ret-code:0";
-		}
-		if (job.shell.responses) {
+		
+		if (job.shell.onConnect) {
+			if (job.shell.onConnect.waitForPrompt) {
+				if (!job.shell.onConnect.responses) {
+					job.shell.onConnect.responses = {};
+				}
+				job.shell.onConnect.responses[job.shell.onConnect.waitForPrompt] = "#ret-code:0";
+			}
 			//job.shell.responses['#']="PS1="+knowhowShellPrompt+";";
 			//job.shell.responses['_']="PS1="+knowhowShellPrompt+";";
-			var responseCommand = {};
-			responseCommand.responses = job.shell.responses;
 			newCommands = new Array(job.script.commands.length+1);
-			newCommands[0] = responseCommand;
+			newCommands[0] = job.shell.onConnect;
 			for (index = 0; index < job.script.commands.length; index++) {
 				console.log(index+" "+job.script.commands[index].command);
 				newCommands[index+1]=job.script.commands[index];
@@ -141,7 +143,6 @@ var executeJob = function(job, callback) {
 	term.on('error', function(err) {
 		//console.log(err.message);
 		clearInterval(progressCheck);
-		term.write('exit\r');
 		term.end();
 		delete scriptRuntime.currentCommand;
 		if (callback) {
@@ -159,6 +160,12 @@ var executeJob = function(job, callback) {
 		//console.log(command);
 		command.callback = callback;
 		command.output = '';
+		if (command.waitForPrompt) {
+			if (!command.responses) {
+				command.responses = {};
+			}
+			command.responses[command.waitForPrompt] = "#ret-code:0";
+		}
 		scriptRuntime.currentCommand = command;
 		if (command.command) {
 			term.write(command.command+'\r');
@@ -167,11 +174,16 @@ var executeJob = function(job, callback) {
 	    }.bind({scriptRuntime: scriptRuntime}), 
 	    function(err) {
 	    	exitCommand= function(callback) {
-					scriptRuntime.currentCommand.command=':;exit\r';
-					term.write(scriptRuntime.currentCommand.command);
+	    		if (job.shell.onExit) {
+					scriptRuntime.currentCommand=job.shell.onExit;
 					scriptRuntime.currentCommand.callback = callback;
-				};
+					term.write(scriptRuntime.currentCommand.command);
+				} else if (callback) {
+					callback();
+				}
+			};
 	    	if (err) {
+				console.log(err.message);
 				job.progress=0;
 				job.status=err.message;
 				eventEmitter.emit('job-error',job);
@@ -278,7 +290,6 @@ var setEnv = function(job) {
 	var dollarRE = /\$\w+/g;
 	var dollarBracketRE = /\${\w*}/g;
 	try {
-		variable = "USER";
 		for (variable in job.script.env) {
 			async.series([
 				
@@ -294,12 +305,24 @@ var setEnv = function(job) {
 							
 							//console.log(variable+":"+job.shell.args[index]);
 						}
-						for (response in job.shell.responses) {  
-							job.shell.responses[response] = replaceVar(dollarRE,variable,job.shell.responses[response]);
-							job.shell.responses[response] = replaceVar(dollarBracketRE,variable,job.shell.responses[response]);
+						for (response in job.shell.onConnect.responses) {
+							
+							job.shell.onConnect.responses[response] = replaceVar(dollarRE,variable,job.shell.onConnect.responses[response]);
+							job.shell.onConnect.responses[response] = replaceVar(dollarBracketRE,variable,job.shell.onConnect.responses[response]);
 						}
-						job.shell.waitForPrompt = replaceVar(dollarRE,variable,job.shell.waitForPrompt);
-						job.shell.waitForPrompt = replaceVar(dollarBracketRE,variable,job.shell.waitForPrompt);
+						job.shell.onConnect.command = replaceVar(dollarRE,variable,job.shell.onConnect.command);
+						job.shell.onConnect.command = replaceVar(dollarBracketRE,variable,job.shell.onConnect.command);
+						job.shell.onConnect.waitForPrompt = replaceVar(dollarRE,variable,job.shell.onConnect.waitForPrompt);
+						job.shell.onConnect.waitForPrompt = replaceVar(dollarBracketRE,variable,job.onConnect.shell.waitForPrompt);
+						for (response in job.shell.onExit.responses) {
+							
+							job.shell.onExit.responses[response] = replaceVar(dollarRE,variable,job.shell.onExit.responses[response]);
+							job.shell.onExit.responses[response] = replaceVar(dollarBracketRE,variable,job.shell.onExit.responses[response]);
+						}
+						job.shell.onExit.command = replaceVar(dollarRE,variable,job.shell.onExit.command);
+						job.shell.onExit.command = replaceVar(dollarBracketRE,variable,job.shell.onExit.command);
+						job.shell.onExit.waitForPrompt = replaceVar(dollarRE,variable,job.shell.onExit.waitForPrompt);
+						job.shell.onExit.waitForPrompt = replaceVar(dollarBracketRE,variable,job.onExit.shell.waitForPrompt);
 					}
 					callback();
 				}, function(callback) {
