@@ -135,9 +135,13 @@ By default knowhow-shell will open a host's bash shell, but it is possible to sp
             "args": [
                 "${USER}@${HOST}"
             ],
-            "responses": {
-                "password": "${PASSWORD}" 
+            "onConnect" : {
+                "responses": {
+                    "password": "${PASSWORD}" 
+                },
+            "waitForPrompt" : "[$]"
             },
+        },
         "waitForPrompt" : "[$]",
     },
     "options": {
