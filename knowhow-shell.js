@@ -79,7 +79,7 @@ var executeJob = function(job, callback) {
 	  cwd: job.working_dir,
 	  env: job.script.env
 	});
-	
+	term.write(':\r');
 	jobsInProgress[job.id] = job;
 	jobsInProgress[job.id].term = term;
 	console.log(term.process);
@@ -92,10 +92,8 @@ var executeJob = function(job, callback) {
 		  	//}
 		  //output=data.split(retCodeRE)[0];
 		   //process.stdout.write("o:^"+data+"o:$");
-	  	  //if (output) {
-	  	  	scriptRuntime.output+=data;
-	  	  	scriptRuntime.currentCommand.output+=data;
-	  	  //}
+	  	 scriptRuntime.output+=data;
+	  	 scriptRuntime.currentCommand.output+=data;
 	  	  
 	  	  //console.log("responses="+scriptRuntime.currentCommand.responses);
 		  if (scriptRuntime.currentCommand.responses) {
@@ -126,6 +124,7 @@ var executeJob = function(job, callback) {
 		  		.replace(retCodeRE,"").replace(scriptRuntime.currentCommand.command,"").trim();
 		  	//console.log('return code: '+scriptRuntime.currentCommand.returnCode);
 		  	if (scriptRuntime.currentCommand.returnCode != 0) {
+				term.write(':\r')
 		  		eventEmitter.emit('execution-error',scriptRuntime.currentCommand);
 		  		scriptRuntime.currentCommand.callback(new Error(scriptRuntime.currentCommand.output));
 		  	} else {
@@ -142,6 +141,7 @@ var executeJob = function(job, callback) {
 	term.on('error', function(err) {
 		//console.log(err.message);
 		clearInterval(progressCheck);
+		term.write('exit\r');
 		term.end();
 		delete scriptRuntime.currentCommand;
 		if (callback) {
@@ -166,15 +166,23 @@ var executeJob = function(job, callback) {
 		//term.write("wait | echo \"D_O_N_E: "+currentCommand.command+'\r');
 	    }.bind({scriptRuntime: scriptRuntime}), 
 	    function(err) {
+	    	exitCommand= function(callback) {
+					scriptRuntime.currentCommand.command=':;exit\r';
+					term.write(scriptRuntime.currentCommand.command);
+					scriptRuntime.currentCommand.callback = callback;
+				};
 	    	if (err) {
 				job.progress=0;
 				job.status=err.message;
 				eventEmitter.emit('job-error',job);
 				clearInterval(progressCheck);
-				term.end();
-				if (callback) {
-					callback(err, scriptRuntime);
-				}
+				
+				exitCommand(function() {
+					term.end();
+					if (callback) {
+						callback(err, scriptRuntime);
+					}
+				});
 				return;
 			}
 			job.progress=0;
@@ -182,14 +190,18 @@ var executeJob = function(job, callback) {
 			eventEmitter.emit("job-complete", job);
 			
 			
-			delete scriptRuntime.currentCommand;
-			delete jobsInProgress[job.id];
+			
 			clearInterval(progressCheck);
-	        //logger.info("done");
-	    	term.end();
-	    	if (callback) {
-				callback(undefined, scriptRuntime);
-			}
+	        exitCommand(function() {
+				term.end();
+				delete scriptRuntime.currentCommand;
+				delete jobsInProgress[job.id];
+		    	if (callback) {
+					callback(undefined, scriptRuntime);
+				}
+			});
+			
+			
 		}
 	    	
 	 );
@@ -337,4 +349,3 @@ KnowhowShell.prototype.on = function(type, func) {
 
 module.exports = exports = KnowhowShell;
 exports.KnowhowShell = KnowhowShell;
-
