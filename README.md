@@ -142,7 +142,6 @@ By default knowhow-shell will open a host's bash shell, but it is possible to sp
             "waitForPrompt" : "[$]"
             },
         },
-        "waitForPrompt" : "[$]",
     },
     "options": {
         "timeoutms": 3600
