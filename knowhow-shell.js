@@ -174,7 +174,7 @@ var executeJob = function(job, callback) {
 	    }.bind({scriptRuntime: scriptRuntime}), 
 	    function(err) {
 	    	exitCommand= function(callback) {
-	    		if (job.shell.onExit) {
+	    		if (job.shell && job.shell.onExit) {
 					scriptRuntime.currentCommand=job.shell.onExit;
 					scriptRuntime.currentCommand.callback = callback;
 					term.write(scriptRuntime.currentCommand.command);
