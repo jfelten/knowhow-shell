@@ -23,9 +23,9 @@ sshJob = {
   "files": [],
 	script: {
 		"env": {
-      		USER: 'pi',
-      		PASSWORD: 'comdisco',
-      		HOST: '192.168.10.4',
+      		USER: 'MYUSER',
+      		PASSWORD: 'MYPASSWORD',
+      		HOST: 'MYHOST',
     	},
 		commands: [
 
