@@ -103,6 +103,9 @@ var executeJob = function(job, callback) {
 			  	//}
 			  //output=data.split(retCodeRE)[0];
 			   //process.stdout.write("o:^"+data+"o:$");
+			 if (!scriptRuntime.output && data.size) {
+			 	scriptRuntime.firstTimeOutput=true;
+			 }
 		  	 scriptRuntime.output+=data;
 		  	 scriptRuntime.currentCommand.output+=data;
 		  	  
@@ -145,7 +148,7 @@ var executeJob = function(job, callback) {
 			  	console.log("completed: "+scriptRuntime.currentCommand.command);
 			  	scriptRuntime.currentCommand.callback();
 			  	
-			  }
+			  } 
 			}
 		  
 		});
