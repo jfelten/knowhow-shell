@@ -393,56 +393,77 @@ var setEnv = function(job, callback) {
 					cb();
 				}
 			}, function (cb) {
-				if (job.shell && job.shell.onConnect) {
-					async.eachSeries(Object.keys(job.shell.onConnect.responses), function( response, rcb) {
-						executeReplaceVars(job.shell.onConnect.responses[response],function(err,val) {
-							job.shell.onConnect.responses[response] = val;
-							rcb();
-						});
-						//console.log("job.shell.onConnect.responses."+response+"="+job.shell.onConnect.responses[response]); 
-					}, function(err) {
-						if (err) {
-							cb(err);
-						} 
-					})
-					//console.log("job.shell.onConnect.command="+job.shell.onConnect.command);
+				if (job.shell && job.shell.onConnect ) {
 					executeReplaceVars(job.shell.onConnect.command, function(err,val) {
-						job.shell.onConnect.command = val;
-						//console.log("job.shell.onConnect.command="+job.shell.onConnect.command);
+						if (err) {
+							callback(err);
+						} else {
+							job.shell.onConnect.command = val;
+							//console.log("job.shell.onConnect.command="+job.shell.onConnect.command);
+							executeReplaceVars(job.shell.onConnect.waitForPrompt, function(err, val2) {
+								if (err) {
+									callback(err);
+								} else {
+							 		job.shell.onConnect.waitForPrompt = val2;
+							 		if (job.shell.onConnect.responses) {
+										async.eachSeries(Object.keys(job.shell.onConnect.responses), function( response, rcb) {
+											executeReplaceVars(job.shell.onConnect.responses[response],function(err,val) {
+												job.shell.onConnect.responses[response] = val;
+												rcb();
+											});
+											//console.log("job.shell.onConnect.responses."+response+"="+job.shell.onConnect.responses[response]); 
+										}, function(err) {
+											if (err) {
+												cb(err);
+												return;
+											}
+											cb();
+										});
+									} else {
+										cb();
+									}
+							 	}
+							 	//console.log("waitForPrompt ="+job.shell.onConnect.waitForPrompt);
+							});
+						}
 					});
-					executeReplaceVars(job.shell.onConnect.waitForPrompt, function(err, val2) {
-					 	job.shell.onConnect.waitForPrompt = val2;
-					 	//console.log("waitForPrompt ="+job.shell.onConnect.waitForPrompt);
-					});
-					cb();
+					
 					
 				} else {
+					//console.log("job.shell.onConnect.command="+job.shell.onConnect.command);
 					cb();
 				}
 		}, function (cb) {
-				if (job.shell && job.shell.onExit) {
+			if (job.shell && job.shell.onExit) {
 					executeReplaceVars(job.shell.onExit.command, function (err, val) {
-						job.shell.onExit.command = val;
-					});
-					executeReplaceVars(job.shell.onExit.waitForPrompt, function(err, val) {
-						job.shell.onExit.waitForPrompt = val;
-					});
-					if(job.shell.onExit.responses) {
-						async.eachSeries(Object.keys(job.shell.onExit.responses), function( response, rcb) {
-							executeReplaceVars(job.shell.onExit.responses[response],rcb, function(err, val) {
-								job.shell.onExit.responses[response] = val;
-								rcb();
+						if (err) {
+							cb(err);
+						} else {
+							job.shell.onExit.command = val;
+							executeReplaceVars(job.shell.onExit.waitForPrompt, function(err, val) {
+								if (err) {
+									cb(err);
+								} else {
+									job.shell.onExit.waitForPrompt = val;
+									if(job.shell.onExit.responses) {
+										async.eachSeries(Object.keys(job.shell.onExit.responses), function( response, rcb) {
+											executeReplaceVars(job.shell.onExit.responses[response],rcb, function(err, val) {
+												job.shell.onExit.responses[response] = val;
+												rcb();
+											});
+										}, function(err) {
+											if (err) {
+												cb(err);
+											}
+											cb();
+										});
+									} else {
+										cb();
+									}
+								}
 							});
-						}, function(err) {
-							if (err) {
-								cb(err);
-							}
-							cb();
-						});
-					} else {
-						cb();
-					}
-
+						}
+					});
 				} else {
 					cb();
 				}
