@@ -11,12 +11,18 @@ var proptRE = /~~KHshell~~/;
 //var proptRE = new RegExp(knowhowShellPrompt);
 
 var jobsInProgress = {};
+var progressCheck;
 
 var cancelJob = function(job) {
+	if (progressCheck) {
+		clearInterval(progressCheck);
+	}
+	if (job && job.id) {
+
+		delete jobsInProgress[job.id];
+	}
 	if (job && job.id && jobsInProgress[job.id] && jobsInProgress[job.id].term) {
 		jobsInProgress[job.id].term.exit();
-		clearInterval(progressCheck);
-		delete jobsInProgress[job.id];
 	}	
 };
 
@@ -161,7 +167,7 @@ var executeJob = function(job, callback) {
 				callback(err, scriptRuntime);
 			}
 		});
-		var progressCheck = setInterval(function() {
+		progressCheck = setInterval(function() {
 		    job.progress++;
 		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
 	
