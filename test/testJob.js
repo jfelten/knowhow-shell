@@ -112,5 +112,11 @@ npmInitJob = {
 };
 
 knowhowShell.executeJob(npmInitJob, function(err) {
+	console.log("done...........");
+	if (err) {
+		console.log(err.message);
+		console.log(err.stack);
+	}
 	assert.ifError(err);
 });
+
