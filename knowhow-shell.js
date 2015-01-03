@@ -290,7 +290,7 @@ var setEnv = function(job, callback) {
 				        var value = job.script.env[varName];
 				    	if (!value) {
 				    		console.error("invalid variable: "+varName);
-				    		throw new Error("invalid variable: "+varName);
+				    		rvCB(new Error("invalid variable: "+varName));
 				    		return searchString;
 				    	}
 				    	//console.log("replaceVal="+replaceVal+" value="+value);
