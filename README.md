@@ -164,6 +164,42 @@ By default knowhow-shell will open a host's bash shell, but it is possible to sp
     }
     }
 
+## Getting more sophisticated - Using sudo example with error conditions
+
+We have no control over what the host system will do, and sometimes we need to sense when something has gone wrong.  Any command or onConnect may have and "errorConditions" attribute, which is an array of strings to look for when something goes bad.  If any of these strings are detected the job immediately aborts.
+
+    sudoJob = { 
+        "id": "example ssh interactive shell",
+        "working_dir": "./",
+        "shell": {
+            "command": "sudo su - ${SUDO_USER}",
+            "onConnect" : {
+                "responses": {
+                    "[Pp]assword": "${PASSWORD}"
+                },
+                "errorConditions" : ["Sorry","[Dd]enied"],
+                "waitForPrompt" : "[$]"
+            },
+            "onExit" : {
+                "command": "exit"
+            }
+        },
+        "options": {
+            "timeoutms": 3600
+        },
+        "files": [],
+        script: {
+            "env": {
+      		    SUDO_USER: 'vip',
+      		    PASSWORD: 'password'
+    	    },
+    	    commands: [
+    	        {command: 'ls'},
+    	        {command: 'pwd'}
+    	    ] 
+        }
+    }
+
 ## Developing
 
 
