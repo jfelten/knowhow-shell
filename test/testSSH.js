@@ -16,6 +16,9 @@ sshJob = {
 	  	},
   		"waitForPrompt" : "[$]"
   	},
+  	"onExit" : {
+  		"command": "exit"
+  	}
   },
   "options": {
     "timeoutms": 3600
@@ -23,9 +26,9 @@ sshJob = {
   "files": [],
 	script: {
 		"env": {
-      		USER: 'MYUSER',
-      		PASSWORD: 'MYPASSWORD',
-      		HOST: 'MYHOST',
+      		USER: 'pi',
+      		PASSWORD: 'comdiscoa',
+      		HOST: '192.168.10.4',
     	},
 		commands: [
 
