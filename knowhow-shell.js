@@ -1,6 +1,7 @@
 var pty = require('pty.js');
 var async = require('async');
 var process = require('process');
+var _ = require('underscore');
 var EventEmitter = require('events').EventEmitter;
 var eventEmitter = new EventEmitter();
 
@@ -12,10 +13,14 @@ var proptRE = /~~KHshell~~/;
 
 var jobsInProgress = {};
 var progressCheck;
+var timeout;
 
 var cancelJob = function(job) {
 	if (progressCheck) {
 		clearInterval(progressCheck);
+	}
+	if (timeout) {
+		clearTimeout(timeout);
 	}
 	if (job && job.id) {
 
@@ -28,11 +33,7 @@ var cancelJob = function(job) {
 
 var executeJob = function(job, callback) {
 	setEnv(job, function(err) {
-		var scriptRuntime = {	
-			currentStep: 0,
-			output: '',
-			progressStepLength: Math.floor(100/job.script.commands.length)
-		};
+		
 		if (err) {
 			if (callback) {
 				scriptRuntime.output = "Unable to intialize job: err.message";
@@ -40,7 +41,7 @@ var executeJob = function(job, callback) {
 				return;
 			}
 		}
-		console.log(job.id+" environment set.");
+		//console.log(job.id+" environment set.");
 		
 		var shell="bash";
 		var args = [];
@@ -61,10 +62,12 @@ var executeJob = function(job, callback) {
 			newCommands1[index+2]=job.script.commands[index];
 		}
 		job.script.commands = newCommands1;
-		if (job.shell) {
-			shell=job.shell.command;
+		if (job.shell && job.shell.command) {
+			shellCommand=job.shell;
 			if (job.shell.args) {
-				args = job.shell.args;
+				for (index in job.shell.args) {
+					shellCommand.command+=" "+job.shell.args[index];
+				}
 			}
 			
 			job.script.commands = newCommands1;
@@ -76,18 +79,31 @@ var executeJob = function(job, callback) {
 					}
 					job.shell.onConnect.responses[job.shell.onConnect.waitForPrompt] = "#ret-code:0";
 				}
+				if (job.shell.onConnect.errorConditions) {
+					shellCommand.errorConditions = job.shell.onConnect.errorConditions;
+				}
+				shellCommand.responses = job.shell.onConnect.responses;
 				//job.shell.responses['#']="PS1="+knowhowShellPrompt+";";
 				//job.shell.responses['_']="PS1="+knowhowShellPrompt+";";
-				newCommands = new Array(job.script.commands.length+1);
-				newCommands[0] = job.shell.onConnect;
-				for (index = 0; index < job.script.commands.length; index++) {
-					console.log(index+" "+job.script.commands[index].command);
-					newCommands[index+1]=job.script.commands[index];
+				newCommands = new Array(job.script.commands.length+2);
+				newCommands[0] = job.script.commands[0];
+				newCommands[1] = shellCommand;
+				newCommands[2] ={
+					"command" : "PS1="+knowhowShellPrompt+"; PROMPT_COMMAND="+knowhowShellPromptCommand
+				};
+				for (index = 1; index < job.script.commands.length; index++) {
+					//console.log(index+" "+job.script.commands[index].command);
+					newCommands[index+2]=job.script.commands[index];
 				}
 				job.script.commands = newCommands;
 			}
 			
 		}
+		var scriptRuntime = {	
+			currentStep: 0,
+			output: '',
+			progressStepLength: Math.floor(100/job.script.commands.length)
+		};
 		console.log("opening shell "+shell+" with args "+args);
 		var term = pty.spawn(shell, args, {
 		  name: 'xterm-color',
@@ -117,14 +133,23 @@ var executeJob = function(job, callback) {
 		  	  
 		  	  //console.log("responses="+scriptRuntime.currentCommand.responses);
 			  if (scriptRuntime.currentCommand.responses) {
-			  	for (response in scriptRuntime.currentCommand.responses) {
-			  		var re = new RegExp(response,"g");
-			  		if (data.match(response)) {
-			  			//console.log("response: "+response+" "+scriptRuntime.currentCommand.responses[response]);
-			  			term.write(scriptRuntime.currentCommand.responses[response]+"\r");
-			  			delete scriptRuntime.currentCommand.responses[response];
+			  	_.each(scriptRuntime.currentCommand.responses, function(response, responseKey, list) {
+			  		//var re = new RegExp(response,"g");
+			  		//console.log("response: "+responseKey+" "+response);
+			  		if (data.match(responseKey)) {
+			  			//console.log("match response: "+responseKey+" "+response);
+			  			term.write(response+"\r");
+			  			delete scriptRuntime.currentCommand.responses[responseKey];
 			  		}
-			  	}
+			  	});
+			  	//for (response in scriptRuntime.currentCommand.responses) {
+			  	//	var re = new RegExp(response,"g");
+			  	//	if (data.match(response)) {
+			  	//		//console.log("response: "+response+" "+scriptRuntime.currentCommand.responses[response]);
+			  	//		term.write(scriptRuntime.currentCommand.responses[response]+"\r");
+			  	//		delete scriptRuntime.currentCommand.responses[response];
+			  	//	}
+			  	//}
 			  }
 			  
 			  
@@ -154,13 +179,26 @@ var executeJob = function(job, callback) {
 			  	console.log("completed: "+scriptRuntime.currentCommand.command);
 			  	scriptRuntime.currentCommand.callback();
 			  	
-			  } 
+			  }
+			  
+			}
+			if (scriptRuntime.currentCommand && scriptRuntime.currentCommand.errorConditions) {
+			  	_.each(scriptRuntime.currentCommand.errorConditions, function(errorCondition, index, list) {
+		  		//var re = new RegExp(response,"g");
+			  		if (data.match(errorCondition)) {
+			  			console.log("ERROR!!!!!!!!!");
+			  			term.write(':\r')
+			  			eventEmitter.emit('execution-error',scriptRuntime.currentCommand);
+			  			scriptRuntime.currentCommand.callback(new Error(scriptRuntime.currentCommand.output));
+			  		}
+			  	});
 			}
 		  
 		});
 		term.on('error', function(err) {
 			//console.log(err.message);
 			clearInterval(progressCheck);
+			clearTimeout(timeout);
 			term.end();
 			delete scriptRuntime.currentCommand;
 			if (callback && !job.complete) {
@@ -172,13 +210,30 @@ var executeJob = function(job, callback) {
 		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
 	
 		},5000);
+		var timeoutms = 120000;
+		if (job.options.timeoutms) {
+			timeoutms = job.options.timeoutms;
+		}
+		timeout = setTimeout(function() {
+			if (progressCheck) {
+				clearInterval(progressCheck);
+			}
+			job.status='Timed out';
+			eventEmitter.emit('job-error',job);
+			cancelJob(job);
+			term.end();
+			if (callback) {
+				callback(new Error("timed out"), scriptRuntime);
+			}
+		},timeoutms);
+		
 		//console.log(job);
 		async.eachSeries(job.script.commands, function(command,callback) {
 			//if (!term || term.total <1) {
 			//	callback(new Error("unable to access term"));
 			//}
 			scriptRuntime.currentStep++;
-			console.log(command);
+			//console.log(command);
 			command.callback = callback;
 			command.output = '';
 			if (command.waitForPrompt) {
@@ -187,6 +242,7 @@ var executeJob = function(job, callback) {
 				}
 				command.responses[command.waitForPrompt] = "#ret-code:0";
 			}
+
 			scriptRuntime.currentCommand = command;
 			if (command.command) {
 				term.write(command.command+'\r');
@@ -206,18 +262,17 @@ var executeJob = function(job, callback) {
 					}
 				};
 		    	if (err) {
-					console.log(err.message);
+					console.log("ERROR!!!!"+err.message);
 					job.progress=0;
 					//job.status=err.message;
 					eventEmitter.emit('job-error',job);
 					clearInterval(progressCheck);
+					clearTimeout(timeout);
 					
-					exitCommand(function() {
-						term.end();
-						if (callback) {
-							callback(err, scriptRuntime);
-						}
-					});
+					term.end();
+					if (callback) {
+						callback(err, scriptRuntime);
+					}
 					return;
 				}
 				job.progress=0;
@@ -227,6 +282,7 @@ var executeJob = function(job, callback) {
 				
 				
 				clearInterval(progressCheck);
+				clearTimeout(timeout);
 		        exitCommand(function() {
 					term.end();
 					delete scriptRuntime.currentCommand;
@@ -234,6 +290,7 @@ var executeJob = function(job, callback) {
 			    	if (callback) {
 						callback(undefined, scriptRuntime);
 					}
+					console.log("knowhow-shell done");
 				});
 				
 				
@@ -245,7 +302,7 @@ var executeJob = function(job, callback) {
 }
 
 var setEnv = function(job, callback) {
-	console.log("setting environment");
+	//console.log("setting environment");
 	if (!job || !job.script) {
 		callback(new Error("no job defined"));
 		return;
@@ -289,7 +346,7 @@ var setEnv = function(job, callback) {
 				        var varName = replaceVal.replace('{','').replace('}','').replace('$','');
 				        var value = job.script.env[varName];
 				    	if (!value) {
-				    		console.error("invalid variable: "+varName);
+				    		//console.error("invalid variable: "+varName);
 				    		rvCB(new Error("invalid variable: "+varName));
 				    		return searchString;
 				    	}
@@ -382,22 +439,29 @@ var setEnv = function(job, callback) {
 				if (job.shell) {
 					index=0;
 					//console.log(job.shell.args);
-					async.eachSeries(job.shell.args, function(arg, acb) {
-						index = job.shell.args.indexOf(arg);
-						//console.log("arg="+arg+" index="+index);
-						 executeReplaceVars(arg,function (err, val) {
-						 	job.shell.args[index] = val;
-							acb();
+					if (job.shell.args) {
+						async.eachSeries(job.shell.args, function(arg, acb) {
+							index = job.shell.args.indexOf(arg);
+							//console.log("arg="+arg+" index="+index);
+							 executeReplaceVars(arg,function (err, val) {
+							 	job.shell.args[index] = val;
+								acb();
+							});
+						}, function(err) {
+							if (err) {
+								console.error(err.message);
+								console.log(err.stack);
+								cb(err);
+								return;
+							} 
 						});
-					}, function(err) {
-						if (err) {
-							console.error(err.message);
-							console.log(err.stack);
-							cb(err);
-						} else {
-							cb();
-						}
-					});
+					}
+					if (job.shell.command) {
+						executeReplaceVars(job.shell.command,function(err,val) {
+							job.shell.command = val;
+						});
+					}
+					cb();
 				} else {
 					cb();
 				}
@@ -510,7 +574,7 @@ var setEnv = function(job, callback) {
 				}
 				return;
 			} else {
-				console.log("env completed");
+				//console.log("env completed");
 				if(callback) {
 					callback();
 				}
