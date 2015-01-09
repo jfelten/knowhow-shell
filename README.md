@@ -166,7 +166,7 @@ By default knowhow-shell will open a host's bash shell, but it is possible to sp
 
 ## Getting more sophisticated - Using sudo example with error conditions
 
-We have no control over what the host system will do, and sometimes we need to sense when something has gone wrong.  Any command or onConnect may have and "errorConditions" attribute, which is an array of strings to look for when something goes bad.  If any of these strings are detected the job immediately aborts.
+We have no control over what the host system will do, and sometimes we need to sense when something has gone wrong.  For example on some systems an invalid password can leave an open prompt forever.  Any command or onConnect may have and "errorConditions" attribute, which is an array of strings to look for when something goes bad.  If any of these strings are detected the job immediately aborts.
 
     sudoJob = { 
         "id": "run a job as another user",
