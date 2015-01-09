@@ -1,6 +1,6 @@
 {
   "name": "knowhow-shell",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "An interpretter to run automated shell jobs",
   "main": "knowhow-shell.js",
   "directories": {
