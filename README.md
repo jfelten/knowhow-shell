@@ -42,19 +42,19 @@ Knowhow jobs are json objects that define a script to be run and any necessary i
             }
         },
     "script": { - [mandatory] Defines the script to be run
-     "env": { [optional]specify any environment variables in the shell here
+     "env": { - [optional]specify any environment variables in the shell here
       "USER": "VALUE1", - set as a shell variable but can also be referneced in the script
       "PASSWORD": "VALUE2", - set as a shell variable but can also be referneced in the script
       "GIT_PASSWORD": "VALUE3", - set as a shell variable but can also be referneced in the script
       "CHECKOUT_DIR": "VALUE4" - set as a shell variable but can also be referneced in the script
     },
-    commands: [ Array of commands to execution  Execution starts in ${working_dir}
+    commands: [ - Array of commands to execute. Execution starts in ${working_dir}
      {
-      command: 'rm -rf ${CHECKOUT_DIR}' first command to execute
+      command: 'rm -rf ${CHECKOUT_DIR}' - first command to execute
      },
      {
-      command: 'git clone $REPO_TO_CLONE $CHECKOUT_DIR', 2nd command to execute
-      responses: { - responses is RegEX/value hash where the RegEx is matched to any text in the tty
+      command: 'git clone $REPO_TO_CLONE $CHECKOUT_DIR', - 2nd command to execute
+      responses: { - responses is a RegEx/value hash where RegEx is matched to any text in the tty
        "[Pp]assword": "$GIT_PASSWORD"  - send $GIT_PASSWORD if prompted with either Password or password
       }
      }
