@@ -16,6 +16,52 @@ This will send the string $GIT_PASSWORD to the terminal when prompted with a str
 
     npm install knowhow-shell
 
+# Anatomy of a knowhow job
+
+Knowhow jobs are json objects that define a script to be run and any necessary inputs that are needed.  These objects can then be fed into knowhow-shell.executeJob(job, callback) for execution.  Knowhow-shell will trigger a 'job-complete' event when the script is finished with the script output as a variable.  Here is a job marked up with inline explanations of each value:
+
+    sampleJob = { 
+        "id": "MY_ID", - [mandatory] ID of your job, 
+        "working_dir": "MY_DIR", - where to run this
+     "options": { [optional] define any options here
+      "timeoutms": 3600 - job will error out after this time in ms default is 600000
+    },
+    "shell": {[optional] Default shell is bash, but we can define anything to act as the shell here
+            "command": "ssh", - for example ssh
+            "args": [ option commandline arguments - argeuments can also be added to the command line above
+                "${USER}@${HOST}" We can reference any variables already defined in our script
+            ],
+            "onConnect" : { - tell the shell what to do when the shell connects
+                "responses": {
+                    "[Pp]assword": "${PASSWORD}"   For example send password if promopted
+                },
+            "waitForPrompt" : "[$]" This tells the shell to wait for the propmt '$' to appear
+            },
+            "onExit" : { Add exit behavior here like logginging out or closing a session
+                "command": "exit"
+            }
+        },
+    "script": { - [mandatory] Defines the script to be run
+     "env": { [optional]specify any environment variables in the shell here
+      "USER": "VALUE1", - set as a shell variable but can also be referneced in the script
+      "PASSWORD": "VALUE2", - set as a shell variable but can also be referneced in the script
+      "GIT_PASSWORD": "VALUE3", - set as a shell variable but can also be referneced in the script
+      "CHECKOUT_DIR": "VALUE4" - set as a shell variable but can also be referneced in the script
+    },
+    commands: [ Array of commands to execution  Execution starts in ${working_dir}
+     {
+      command: 'rm -rf ${CHECKOUT_DIR}' first command to execute
+     },
+     {
+      command: 'git clone $REPO_TO_CLONE $CHECKOUT_DIR', 2nd command to execute
+      responses: { - responses is RegEX/value hash where the RegEx is matched to any text in the tty
+       "[Pp]assword": "$GIT_PASSWORD"  - send $GIT_PASSWORD if prompted with either Password or password
+      }
+     }
+    ]
+    }
+    };
+
 # Usage
 
 Define a job and use the execute job method.  The following events are exposed: 'command-complete','job-complete', 'job-error', 'job-update'.  Also, job.progress is updated at minimum of each 5 seconds for tracking the progress of script.  The script output is captured in the job-complete event.
