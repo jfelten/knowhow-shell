@@ -18,7 +18,7 @@ This will send the string $GIT_PASSWORD to the terminal when prompted with a str
 
 # Anatomy of a knowhow job
 
-Knowhow jobs are json objects that define a script to be run and any necessary inputs that are needed.  These objects can then be fed into knowhow-shell.executeJob(job, callback) for execution.  Knowhow-shell will trigger a 'job-complete' event when the script is finished with the script output as a variable.  Here is a job marked up with inline explanations of each value:
+Knowhow jobs are json objects that define a script to be run and any necessary inputs that are needed.  These objects are then fed into knowhow-shell.executeJob(job, callback) for execution.  Knowhow-shell will trigger a 'job-complete' event when the script is finished with the script output as a variable.  Here is a job marked up with inline explanations of each value:
 
 <samp>
 sampleJob = {<br>
@@ -249,12 +249,3 @@ We have no control over what the host system will do, and sometimes we need to s
     }
 
 ## Developing
-
-
-
-### Tools
-
-Created with [Nodeclipse](https://github.com/Nodeclipse/nodeclipse-1)
- ([Eclipse Marketplace](http://marketplace.eclipse.org/content/nodeclipse), [site](http://www.nodeclipse.org))   
-
-Nodeclipse is free open-source project that grows with your contributions.
