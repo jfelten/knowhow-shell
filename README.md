@@ -29,7 +29,7 @@ sampleJob = {<br>
 &thinsp;},<br>
 &thinsp;"shell": { <b>[optional] Default shell is bash, but override here</b><br>
 &thinsp;&thinsp;"command": "ssh",  <b>for example ssh</b><br>
-&thinsp;&thinsp;"args": [ <b>optional commandline arguments -can also be added to the command line above</b><br>
+&thinsp;&thinsp;"args": [ <b>optional commandline arguments(can also be added to the command line above)</b><br>
 &thinsp;&thinsp;&thinsp;"${USER}@${HOST}" <b>We can reference any variables already defined in our script</b><br>
 &thinsp;&thinsp;],<br>
 &thinsp;&thinsp;"onConnect" : { <b>tell the shell what to do when it connects</b><br>
