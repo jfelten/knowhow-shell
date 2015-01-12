@@ -20,47 +20,49 @@ This will send the string $GIT_PASSWORD to the terminal when prompted with a str
 
 Knowhow jobs are json objects that define a script to be run and any necessary inputs that are needed.  These objects can then be fed into knowhow-shell.executeJob(job, callback) for execution.  Knowhow-shell will trigger a 'job-complete' event when the script is finished with the script output as a variable.  Here is a job marked up with inline explanations of each value:
 
-    sampleJob = { 
-        "id": "MY_ID", - [mandatory] ID of your job, 
-        "working_dir": "MY_DIR", - where to run this
-     "options": { [optional] define any options here
-      "timeoutms": 3600 - job will error out after this time in ms default is 600000
-    },
-    "shell": {[optional] Default shell is bash, but we can define anything to act as the shell here
-            "command": "ssh", - for example ssh
-            "args": [ option commandline arguments - argeuments can also be added to the command line above
-                "${USER}@${HOST}" We can reference any variables already defined in our script
-            ],
-            "onConnect" : { - tell the shell what to do when the shell connects
-                "responses": {
-                    "[Pp]assword": "${PASSWORD}"   For example send password if promopted
-                },
-            "waitForPrompt" : "[$]" This tells the shell to wait for the propmt '$' to appear
-            },
-            "onExit" : { Add exit behavior here like logginging out or closing a session
-                "command": "exit"
-            }
-        },
-    "script": { - [mandatory] Defines the script to be run
-     "env": { - [optional]specify any environment variables in the shell here
-      "USER": "VALUE1", - set as a shell variable but can also be referneced in the script
-      "PASSWORD": "VALUE2", - set as a shell variable but can also be referneced in the script
-      "GIT_PASSWORD": "VALUE3", - set as a shell variable but can also be referneced in the script
-      "CHECKOUT_DIR": "VALUE4" - set as a shell variable but can also be referneced in the script
-    },
-    commands: [ - Array of commands to execute. Execution starts in ${working_dir}
-     {
-      command: 'rm -rf ${CHECKOUT_DIR}' - first command to execute
-     },
-     {
-      command: 'git clone $REPO_TO_CLONE $CHECKOUT_DIR', - 2nd command to execute
-      responses: { - responses is a RegEx/value hash where RegEx is matched to any text in the tty
-       "[Pp]assword": "$GIT_PASSWORD"  - send $GIT_PASSWORD if prompted with either Password or password
-      }
-     }
-    ]
-    }
+<samp>
+sampleJob = {<br>
+&thinsp;"id": "MY_ID",<b>[mandatory] ID of your job,</b><br>
+&thinsp;"working_dir": "MY_DIR", <b>where to run this</b><br>
+&thinsp;"options": { <b>[optional] define any options here</b><br>
+&thinsp;&thinsp;"timeoutms": 3600 <b>job will error out after this time in ms default is 600000</b><br>
+&thinsp;},<br>
+&thinsp;"shell": { <b>[optional] Default shell is bash, but override here</b><br>
+&thinsp;&thinsp;"command": "ssh",  <b>for example ssh</b><br>
+&thinsp;&thinsp;"args": [ <b>optional commandline arguments -can also be added to the command line above</b><br>
+&thinsp;&thinsp;&thinsp;"${USER}@${HOST}" <b>We can reference any variables already defined in our script</b><br>
+&thinsp;&thinsp;],<br>
+&thinsp;&thinsp;"onConnect" : { <b>tell the shell what to do when it connects</b><br>
+&thinsp;&thinsp;&thinsp;"responses": { <br>
+&thinsp;&thinsp;&thinsp;&thinsp;"[Pp]assword": "${PASSWORD}"  <b>For example send password if promopted</b><br>
+&thinsp;&thinsp;&thinsp;},<br>
+&thinsp;&thinsp;&thinsp;"waitForPrompt" : "[$]" <b>This tells the shell to wait for the propmt '$' to appear</b><br>
+&thinsp;&thinsp;},<br>
+&thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
+&thinsp;&thinsp;&thinsp;"command": "exit"<br>
+&thinsp;}<br>
+},<br>
+"script": { - <b>[mandatory] Defines the script to be run</b><br>
+&thinsp;"env": { <b>[optional]specify any environment variables in the shell here</b><br>
+&thinsp;&thinsp;"USER": "VALUE1", <b>set as a shell variable but can also be referenced in object</b><br>
+&thinsp;&thinsp;"PASSWORD": "VALUE2",<b>set as a shell variable but can also be referenced in object</b><br>
+&thinsp;&thinsp;"GIT_PASSWORD": "VALUE3", <b>set as a shell variable but can also be referenced in object</b><br>
+&thinsp;&thinsp;"CHECKOUT_DIR": "VALUE4" <b>set as a shell variable but can also be referenced in object</b><br>
+&thinsp;},<br>
+&thinsp;commands: [ <b>Array of commands to execute. Execution starts in ${working_dir}</b><br>
+&thinsp;&thinsp;{<br>
+&thinsp;&thinsp;&thinsp;command: 'rm -rf ${CHECKOUT_DIR}' <b>first command to execute</b><br>
+&thinsp;&thinsp;},<br>
+&thinsp;&thinsp;{<br>
+&thinsp;&thinsp;&thinsp;command: 'git clone $REPO_TO_CLONE $CHECKOUT_DIR', <b>2nd command to execute</b><br>
+&thinsp;&thinsp;&thinsp;responses: { <b>responses is a RegEx/value hash where RegEx is matched to any text in the tty</b><br>
+&thinsp;&thinsp;&thinsp;&thinsp;"[Pp]assword": "$GIT_PASSWORD" <b>send $GIT_PASSWORD if prompted with either Password or password</b><br>
+&thinsp;&thinsp;&thinsp;}<br>
+&thinsp;&thinsp;}<br>
+&thinsp;]<br>
+&thinsp;}<br>
     };
+</samp>
 
 # Usage
 
