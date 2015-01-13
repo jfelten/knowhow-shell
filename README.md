@@ -16,6 +16,54 @@ This will send the string $GIT_PASSWORD to the terminal when prompted with a str
 
     npm install knowhow-shell
 
+# Anatomy of a knowhow job
+
+Knowhow jobs are json objects that define a script to be run and any necessary inputs that are needed.  These objects are then fed into knowhow-shell.executeJob(job, callback) for execution.  Knowhow-shell will trigger a 'job-complete' event when the script is finished with the script output as a variable.  Here is a job marked up with inline explanations of each value:
+
+<samp>
+sampleJob = {<br>
+&thinsp;"id": "MY_ID",<b>[mandatory] ID of your job,</b><br>
+&thinsp;"working_dir": "MY_DIR", <b>where to run this</b><br>
+&thinsp;"options": { <b>[optional] define any options here</b><br>
+&thinsp;&thinsp;"timeoutms": 3600 <b>job will error out after this time in ms default is 600000</b><br>
+&thinsp;},<br>
+&thinsp;"shell": { <b>[optional] Default shell is bash, but override here</b><br>
+&thinsp;&thinsp;"command": "ssh",  <b>for example ssh</b><br>
+&thinsp;&thinsp;"args": [ <b>optional commandline arguments(can also be added to the command line above)</b><br>
+&thinsp;&thinsp;&thinsp;"${USER}@${HOST}" <b>We can reference any variables already defined in our script</b><br>
+&thinsp;&thinsp;],<br>
+&thinsp;&thinsp;"onConnect" : { <b>tell the shell what to do when it connects</b><br>
+&thinsp;&thinsp;&thinsp;"responses": { <br>
+&thinsp;&thinsp;&thinsp;&thinsp;"[Pp]assword": "${PASSWORD}"  <b>For example send password if promopted</b><br>
+&thinsp;&thinsp;&thinsp;},<br>
+&thinsp;&thinsp;&thinsp;"waitForPrompt" : "[$]" <b>This tells the shell to wait for the propmt '$' to appear</b><br>
+&thinsp;&thinsp;},<br>
+&thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
+&thinsp;&thinsp;&thinsp;"command": "exit"<br>
+&thinsp;}<br>
+},<br>
+"script": { - <b>[mandatory] Defines the script to be run</b><br>
+&thinsp;"env": { <b>[optional]specify any environment variables in the shell here</b><br>
+&thinsp;&thinsp;"USER": "VALUE1", <b>set as a shell variable but can also be referenced in object</b><br>
+&thinsp;&thinsp;"PASSWORD": "VALUE2",<b>set as a shell variable but can also be referenced in object</b><br>
+&thinsp;&thinsp;"GIT_PASSWORD": "VALUE3", <b>set as a shell variable but can also be referenced in object</b><br>
+&thinsp;&thinsp;"CHECKOUT_DIR": "VALUE4" <b>set as a shell variable but can also be referenced in object</b><br>
+&thinsp;},<br>
+&thinsp;commands: [ <b>Array of commands to execute. Execution starts in ${working_dir}</b><br>
+&thinsp;&thinsp;{<br>
+&thinsp;&thinsp;&thinsp;command: 'rm -rf ${CHECKOUT_DIR}' <b>first command to execute</b><br>
+&thinsp;&thinsp;},<br>
+&thinsp;&thinsp;{<br>
+&thinsp;&thinsp;&thinsp;command: 'git clone $REPO_TO_CLONE $CHECKOUT_DIR', <b>2nd command to execute</b><br>
+&thinsp;&thinsp;&thinsp;responses: { <b>responses is a RegEx/value hash where RegEx is matched to any text in the tty</b><br>
+&thinsp;&thinsp;&thinsp;&thinsp;"[Pp]assword": "$GIT_PASSWORD" <b>send $GIT_PASSWORD if prompted with either Password or password</b><br>
+&thinsp;&thinsp;&thinsp;}<br>
+&thinsp;&thinsp;}<br>
+&thinsp;]<br>
+&thinsp;}<br>
+    };
+</samp>
+
 # Usage
 
 Define a job and use the execute job method.  The following events are exposed: 'command-complete','job-complete', 'job-error', 'job-update'.  Also, job.progress is updated at minimum of each 5 seconds for tracking the progress of script.  The script output is captured in the job-complete event.
@@ -201,12 +249,3 @@ We have no control over what the host system will do, and sometimes we need to s
     }
 
 ## Developing
-
-
-
-### Tools
-
-Created with [Nodeclipse](https://github.com/Nodeclipse/nodeclipse-1)
- ([Eclipse Marketplace](http://marketplace.eclipse.org/content/nodeclipse), [site](http://www.nodeclipse.org))   
-
-Nodeclipse is free open-source project that grows with your contributions.
