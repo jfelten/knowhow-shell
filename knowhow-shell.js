@@ -333,7 +333,7 @@ var setEnv = function(job, callback) {
 			}
 	    	
 		    var iteration=0;
-		    var replacedString = searchString;
+		    var replacedString = String(searchString);
 		   	//console.log("executing: "+regEx+" on "+replacedString);
 			var res = replacedString.match(regEx);
 			var recurse = undefined;
