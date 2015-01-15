@@ -34,9 +34,9 @@ sampleJob = {<br>
 &thinsp;&thinsp;],<br>
 &thinsp;&thinsp;"onConnect" : { <b>tell the shell what to do when it connects</b><br>
 &thinsp;&thinsp;&thinsp;"responses": { <br>
-&thinsp;&thinsp;&thinsp;&thinsp;"[Pp]assword": "${PASSWORD}"  <b>For example send password if promopted</b><br>
+&thinsp;&thinsp;&thinsp;&thinsp;"[Pp]assword": "${PASSWORD}"  <b>For example send password if prompted</b><br>
 &thinsp;&thinsp;&thinsp;},<br>
-&thinsp;&thinsp;&thinsp;"waitForPrompt" : "[$]" <b>This tells the shell to wait for the propmt '$' to appear</b><br>
+&thinsp;&thinsp;&thinsp;"waitForPrompt" : "[$#]" <b>This tells the shell to wait for the propmt '$' or '#' to appear</b><br>
 &thinsp;&thinsp;},<br>
 &thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
 &thinsp;&thinsp;&thinsp;"command": "exit"<br>
