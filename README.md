@@ -34,9 +34,9 @@ sampleJob = {<br>
 &thinsp;&thinsp;],<br>
 &thinsp;&thinsp;"onConnect" : { <b>tell the shell what to do when it connects</b><br>
 &thinsp;&thinsp;&thinsp;"responses": { <br>
-&thinsp;&thinsp;&thinsp;&thinsp;"[Pp]assword": "${PASSWORD}"  <b>For example send password if prompted</b><br>
+&thinsp;&thinsp;&thinsp;&thinsp;"[Pp]assword": "${PASSWORD}"  <b>For example send password if asked</b><br>
 &thinsp;&thinsp;&thinsp;},<br>
-&thinsp;&thinsp;&thinsp;"waitForPrompt" : "[$#]" <b>This tells the shell to wait for the propmt '$' or '#' to appear</b><br>
+&thinsp;&thinsp;&thinsp;"waitForPrompt" : "[$#]" <b>Wait for the prompt '$' or '#' to appear</b><br>
 &thinsp;&thinsp;},<br>
 &thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
 &thinsp;&thinsp;&thinsp;"command": "exit"<br>
@@ -44,10 +44,10 @@ sampleJob = {<br>
 },<br>
 "script": { - <b>[mandatory] Defines the script to be run</b><br>
 &thinsp;"env": { <b>[optional]specify any environment variables in the shell here</b><br>
-&thinsp;&thinsp;"USER": "VALUE1", <b>set as a shell variable but can also be referenced in object</b><br>
-&thinsp;&thinsp;"PASSWORD": "VALUE2",<b>set as a shell variable but can also be referenced in object</b><br>
-&thinsp;&thinsp;"GIT_PASSWORD": "VALUE3", <b>set as a shell variable but can also be referenced in object</b><br>
-&thinsp;&thinsp;"CHECKOUT_DIR": "VALUE4" <b>set as a shell variable but can also be referenced in object</b><br>
+&thinsp;&thinsp;"USER": "VALUE1", <b>set as a shell variable but can also be referenced in job object</b><br>
+&thinsp;&thinsp;"PASSWORD": "VALUE2",<b>set as a shell variable but can also be referenced in job object</b><br>
+&thinsp;&thinsp;"GIT_PASSWORD": "VALUE3", <b>set as a shell variable but can also be referenced in job object</b><br>
+&thinsp;&thinsp;"CHECKOUT_DIR": "VALUE4" <b>set as a shell variable but can also be referenced in job object</b><br>
 &thinsp;},<br>
 &thinsp;commands: [ <b>Array of commands to execute. Execution starts in ${working_dir}</b><br>
 &thinsp;&thinsp;{<br>
