@@ -2,44 +2,37 @@ var KnowhowShell = require('../knowhow-shell.js');
 var knowhowShell = new KnowhowShell();
 var assert = require('assert');
 
-sshJob = { 
-  "id": "example ssh interactive shell",
+sshKeyGenJob = {
+  "id": "create ssh key",
   "working_dir": "./",
-  "shell": {
-  	"command": "ssh",
-  	"args": [
-  		"${USER}@${HOST}"
-  	],
-  	"onConnect" : {
-	  	"responses": {
-	  		"password": "${PASSWORD}" 
-	  	},
-  		"waitForPrompt" : "[$]"
-  	},
-  	"onExit" : {
-  		"command": "exit"
-  	}
-  },
   "options": {
-    "timeoutms": 3600
+    "timeoutms": 360000
   },
   "files": [],
-	script: {
-		"env": {
-      		USER: 'pi',
-      		PASSWORD: '',
-      		HOST: '',
-    	},
-		commands: [
-
-			{
-				command: 'ls'
-			},
-			{
-				command: 'pwd'
-			}
-		] 
-	}
+  "script": {
+    "env": {
+      "KEY_NAME": "KH_KEY",
+      "USER": "",
+      "FILE_LOCATION": "/Users/${USER}/.ssh/id_${KEY_NAME}"
+    },
+    "commands": [
+      {
+        "command": "ssh-keygen -t rsa",
+        "responses": {
+          "Enter file in which to save the key": "${FILE_LOCATION}",
+          "Enter passphrase": "",
+          "Enter same passphrase again": "",
+          "Overwrite": "y"
+        }
+      },
+      {
+        "command": "chmod 700 ~/.ssh"
+      },
+      {
+        "command": "chmod 600 ${FILE_LOCATION}"
+      }
+    ]
+  }
 };
 
 knowhowShell.on('execution-complete', function(command) {
@@ -71,6 +64,6 @@ knowhowShell.on('job-update', function(job) {
 });
 
 
-knowhowShell.executeJob(sshJob, function(err) {
+knowhowShell.executeJob(sshKeyGenJob, function(err) {
 	assert.ifError(err);
 });
