@@ -36,10 +36,11 @@ var executeJob = function(job, callback) {
 		
 		if (err) {
 			if (callback) {
+				scriptRuntime = {};
 				scriptRuntime.output = "Unable to intialize job: err.message";
 				callback(err, scriptRuntime);
-				return;
 			}
+			return;
 		}
 		//console.log(job.id+" environment set.");
 		
@@ -358,13 +359,17 @@ var setEnv = function(job, callback) {
 			      var otherMatches = replacedString.match(regEx);
 			      //console.log(otherMatches);
 			      if (otherMatches && otherMatches !=null) {
-				      async.each(otherMatches, function(match) {
+			      	  recurse = true;
+				      async.each(otherMatches, function(match, omcb) {
 				      	var envVariable = match.replace('\${','').replace('}','');
 				 		//console.log("replacing value: "+envVariable);
 				 		//console.log("replacing other match: "+replacedString+" "+envVariable);
-				 		recurse = true;
-				      	replaceVar(regEx, replacedString, rvCB);
-				      	return
+				 		
+				      	replaceVar(regEx, replacedString, function (err, newString) {
+				      		replacedString = newString;
+				      		omcb();
+				      	});
+
 				      }, function(err) {
 				      	if(err) {
 				      		console.log(err.message);
@@ -372,7 +377,9 @@ var setEnv = function(job, callback) {
 				      		if (rvCB) {
 				      			rvCB(err);
 				      		}
+				      		return;
 				      	}
+				      	rvCB(undefined,replacedString);
 				      });
 				  }
 			}
