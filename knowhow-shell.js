@@ -84,20 +84,19 @@ var executeJob = function(job, callback) {
 					shellCommand.errorConditions = job.shell.onConnect.errorConditions;
 				}
 				shellCommand.responses = job.shell.onConnect.responses;
-				//job.shell.responses['#']="PS1="+knowhowShellPrompt+";";
-				//job.shell.responses['_']="PS1="+knowhowShellPrompt+";";
-				newCommands = new Array(job.script.commands.length+2);
-				newCommands[0] = job.script.commands[0];
-				newCommands[1] = shellCommand;
-				newCommands[2] ={
-					"command" : "PS1="+knowhowShellPrompt+"; PROMPT_COMMAND="+knowhowShellPromptCommand
-				};
-				for (index = 1; index < job.script.commands.length; index++) {
-					//console.log(index+" "+job.script.commands[index].command);
-					newCommands[index+2]=job.script.commands[index];
-				}
-				job.script.commands = newCommands;
 			}
+
+			newCommands = new Array(job.script.commands.length+2);
+			newCommands[0] = job.script.commands[0];
+			newCommands[1] = shellCommand;
+			newCommands[2] ={
+				"command" : "PS1="+knowhowShellPrompt+"; PROMPT_COMMAND="+knowhowShellPromptCommand
+			};
+			for (index = 1; index < job.script.commands.length; index++) {
+				//console.log(index+" "+job.script.commands[index].command);
+				newCommands[index+2]=job.script.commands[index];
+			}
+			job.script.commands = newCommands;
 			
 		}
 		var scriptRuntime = {	
