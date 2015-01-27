@@ -211,7 +211,7 @@ var executeJob = function(job, callback) {
 	
 		},5000);
 		var timeoutms = 120000;
-		if (job.options.timeoutms) {
+		if (job.options && job.options.timeoutms) {
 			timeoutms = job.options.timeoutms;
 		}
 		timeout = setTimeout(function() {
