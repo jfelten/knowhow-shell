@@ -248,4 +248,6 @@ We have no control over what the host system will do, and sometimes we need to s
         }
     }
 
-## Developing
+## [More advanced examples](https://github.com/jfelten/knowhow_example_repo)
+
+Please visit the [knowhow example repository project](https://github.com/jfelten/knowhow_example_repo) to see examples of actual production jobs.
