@@ -51,7 +51,7 @@ var executeJob = function(job, callback) {
 		newCommands1[0] ={
 			"command" : "PS1="+knowhowShellPrompt+"; PROMPT_COMMAND="+knowhowShellPromptCommand
 		};
-		newCommands1[1] = {};
+		newCommands1[1] = {command: ""};
 		for (env in job.script.env) {
 			if (env && env != '' && job.script.env[env] && job.script.env[env] !='') {
 				newCommands1[1].command+=env+'=\"'+job.script.env[env]+"\"";
