@@ -26,15 +26,20 @@ var setEnv = function(job, callback) {
 	//}
 
 	
-	replaceVar = function(regEx,searchString, rvCB) {
+	replaceVar = function(regEx,searchString, envHash, rvCB) {
 
 			if (!searchString) {
-				return searchString;
+				rvCB(new Error("no search string specified"));
+				return;
+			}
+			if (!envHash) {
+				rvCB(undefined, searchString);
+				return;
 			}
 	    	
 		    var iteration=0;
 		    var replacedString = String(searchString);
-		   	//console.log("executing: "+regEx+" on "+replacedString);
+		   	//console.log("executing: "+regEx+" on "+replacedString+" "+envHash);
 			var res = replacedString.match(regEx);
 			var recurse = undefined;
 			//console.log("res="+res);
@@ -44,15 +49,15 @@ var setEnv = function(job, callback) {
 			        //console.log("repalceVal="+replaceVal);
 			        if (replaceVal) {
 				        var varName = replaceVal.replace('{','').replace('}','').replace('$','');
-				        var value = job.script.env[varName];
+				        var value = envHash[varName];
 				    	if (!value) {
 				    		console.error("invalid variable: "+varName);
 				    		rvCB(new Error("invalid variable: "+varName));
 				    		return searchString;
 				    	}
-				    	console.log("replaceVal="+replaceVal+" value="+value);
+				    	//console.log("replaceVal="+replaceVal+" value="+value);
 				    	replacedString=replacedString.replace(replaceVal,value);
-				    	console.log("replacedString="+replacedString+" "+replaceVal);
+				    	//console.log("replacedString="+replacedString+" "+replaceVal);
 				    }
 			      }
 			      var otherMatches = replacedString.match(regEx);
@@ -64,7 +69,7 @@ var setEnv = function(job, callback) {
 				 		//console.log("replacing value: "+envVariable);
 				 		//console.log("replacing other match: "+replacedString+" "+envVariable);
 				 		
-				      	replaceVar(regEx, replacedString, function (err, newString) {
+				      	replaceVar(regEx, replacedString, envHash,function (err, newString) {
 				      		replacedString = newString;
 				      		omcb();
 				      	});
@@ -95,7 +100,8 @@ var setEnv = function(job, callback) {
 			ervcb();
 			return;
 		}
-		replaceVar(dollarRE,value, function(err,dreplacedString) {
+		//console.log("replacing: "+value);
+		replaceVar(dollarRE,value, job.env, function(err,edreplacedString) {
 			if (err) {
 				console.log(err.message);
 				console.log(err.stack);
@@ -104,7 +110,8 @@ var setEnv = function(job, callback) {
 				}
 				return;
 			}
-			replaceVar(dollarBracketRE,dreplacedString, function(err,dsreplacedString) {
+			//console.log("replaced string="+edreplacedString);
+			replaceVar(dollarRE,edreplacedString,job.script.env, function(err,sdreplacedString) {
 				if (err) {
 					console.log(err.message);
 					console.log(err.stack);
@@ -113,12 +120,34 @@ var setEnv = function(job, callback) {
 					}
 					return;
 				}
-				value = dsreplacedString;
-				//console.log(dsreplacedString);
-				if (ervcb) {
-					ervcb(undefined, dsreplacedString);
-				}
-				return value;
+				//console.log("replaced string="+sdreplacedString);
+				replaceVar(dollarBracketRE,sdreplacedString, job.env, function(err,edsreplacedString) {
+					if (err) {
+						console.log(err.message);
+						console.log(err.stack);
+						if (ervcb) {
+							ervcb(err);
+						}
+						return;
+					}
+					//console.log("replaced string="+edsreplacedString);
+					replaceVar(dollarBracketRE,edsreplacedString,job.script.env, function(err,sdsreplacedString) {
+						if (err) {
+							console.log(err.message);
+							console.log(err.stack);
+							if (ervcb) {
+								ervcb(err);
+							}
+							return;
+						}
+						value = sdsreplacedString;
+						//console.log("replaced string="+edsreplacedString);
+						if (ervcb) {
+							ervcb(undefined, sdsreplacedString);
+						}
+						return value;
+					});
+				});
 			});
 		});
 	}
@@ -256,6 +285,7 @@ var setEnv = function(job, callback) {
 							async.each(Object.keys(command.responses), function( response, rcb) {
 								executeReplaceVars(job.script.commands[commandIndex].responses[response],function(err, val) {
 									job.script.commands[commandIndex].responses[response]=val;
+									//console.log("response: "+response+"="+val);
 									rcb();
 								});
 							}, function(err) {
