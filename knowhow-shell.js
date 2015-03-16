@@ -9,8 +9,8 @@ var knowhowInterpreter = require('./knowhow-interpreter');
 var knowhowShellPrompt= '~~KHshell~~';
 var knowhowShellPromptCommand='\'echo "#ret-code:$?"\'';
 var retCodeRE = /\#ret-code:\d+/;
-var proptRE = /~~KHshell~~/;
-//var proptRE = new RegExp(knowhowShellPrompt);
+var promptRE = /~~KHshell~~/;
+//var promptRE = new RegExp(knowhowShellPrompt);
 
 var jobsInProgress = {};
 var progressCheck;
@@ -155,8 +155,8 @@ var executeJob = function(job, callback) {
 			  
 			  
 			  //console.log('detect prompt');
-			  //console.log(data.match(proptRE));
-			  if (data.match(proptRE)) {
+			  //console.log(data.match(promptRE));
+			  if (data.match(promptRE)) {
 			  	//console.log("completed: "+scriptRuntime.currentCommand.command);
 			  	//scriptRuntime.currentCommand.callback();
 			  }
@@ -256,8 +256,15 @@ var executeJob = function(job, callback) {
 		    		job.complete = true;
 		    		if (job.shell && job.shell.onExit) {
 						scriptRuntime.currentCommand=job.shell.onExit;
+						if (!scriptRuntime.currentCommand.responses) {
+							scriptRuntime.currentCommand.responses = {};
+						}
+						if (!scriptRuntime.currentCommand.responses[promptRE]) {
+							scriptRuntime.currentCommand.responses[promptRE] = "#ret-code:0";
+						}	
 						scriptRuntime.currentCommand.callback = ecallback;
 						term.write(scriptRuntime.currentCommand.command);
+						ecallback();
 					} else {
 						ecallback();
 					}
