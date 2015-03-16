@@ -141,7 +141,7 @@ var setEnv = function(job, callback) {
 						//	return;
 						//}
 						value = sdsreplacedString;
-						//console.log("replaced string="+edsreplacedString);
+						//console.log(value+" replaced string="+edsreplacedString);
 						if (ervcb) {
 							ervcb(undefined, sdsreplacedString);
 						}
@@ -160,7 +160,11 @@ var setEnv = function(job, callback) {
 			function(cb) {
 				var index=0;
 				async.eachSeries(Object.keys(job.script.env), function(variable, ecb) {
-					job.script.env[index++] = executeReplaceVars(job.script.env[variable],ecb);
+					executeReplaceVars(job.script.env[variable],function(err, value) {
+						job.script.env[variable] = value;
+						//console.log(variable+"="+job.script.env[variable]);
+						ecb();
+					});
 				}, function(err) {
 					if (err) {
 						cb(err);
