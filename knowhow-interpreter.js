@@ -102,44 +102,44 @@ var setEnv = function(job, callback) {
 		}
 		//console.log("replacing: "+value);
 		replaceVar(dollarRE,value, job.env, function(err,edreplacedString) {
-			if (err) {
-				console.log(err.message);
-				console.log(err.stack);
-				if (ervcb) {
-					ervcb(err);
-				}
-				return;
-			}
+			//if (err) {
+			//	console.log(err.message);
+			//	console.log(err.stack);
+			//	if (ervcb) {
+			//		ervcb(err);
+			//	}
+			//	return;
+			//}
 			//console.log("replaced string="+edreplacedString);
 			replaceVar(dollarRE,edreplacedString,job.script.env, function(err,sdreplacedString) {
-				if (err) {
-					console.log(err.message);
-					console.log(err.stack);
-					if (ervcb) {
-						ervcb(err);
-					}
-					return;
-				}
+				//if (err) {
+				//	console.log(err.message);
+				//	console.log(err.stack);
+				//	if (ervcb) {
+				//		ervcb(err);
+				//	}
+				//	return;
+				//}
 				//console.log("replaced string="+sdreplacedString);
 				replaceVar(dollarBracketRE,sdreplacedString, job.env, function(err,edsreplacedString) {
-					if (err) {
-						console.log(err.message);
-						console.log(err.stack);
-						if (ervcb) {
-							ervcb(err);
-						}
-						return;
-					}
+					//if (err) {
+					//	console.log(err.message);
+					//	console.log(err.stack);
+					//	if (ervcb) {
+					//		ervcb(err);
+					//	}
+					//	return;
+					//}
 					//console.log("replaced string="+edsreplacedString);
 					replaceVar(dollarBracketRE,edsreplacedString,job.script.env, function(err,sdsreplacedString) {
-						if (err) {
-							console.log(err.message);
-							console.log(err.stack);
-							if (ervcb) {
-								ervcb(err);
-							}
-							return;
-						}
+						//if (err) {
+						//	console.log(err.message);
+						//	console.log(err.stack);
+						//	if (ervcb) {
+						//		ervcb(err);
+						//	}
+						//	return;
+						//}
 						value = sdsreplacedString;
 						//console.log("replaced string="+edsreplacedString);
 						if (ervcb) {
