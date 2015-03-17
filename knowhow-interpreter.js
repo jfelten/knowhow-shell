@@ -52,7 +52,7 @@ var setEnv = function(job, callback) {
 				        var value = envHash[varName];
 				    	if (!value) {
 				    		console.error("invalid variable: "+varName);
-				    		rvCB(new Error("invalid variable: "+varName));
+				    		rvCB(new Error("invalid variable: "+varName),searchString);
 				    		return searchString;
 				    	}
 				    	//console.log("replaceVal="+replaceVal+" value="+value);
@@ -140,8 +140,9 @@ var setEnv = function(job, callback) {
 						//	}
 						//	return;
 						//}
+						console.log(value+" replaced string="+sdsreplacedString);
 						value = sdsreplacedString;
-						//console.log(value+" replaced string="+edsreplacedString);
+						
 						if (ervcb) {
 							ervcb(undefined, sdsreplacedString);
 						}
