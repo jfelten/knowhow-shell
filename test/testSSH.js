@@ -4,15 +4,16 @@ var assert = require('assert');
 
 sshJob = { 
   "id": "example ssh interactive shell",
-  "working_dir": "./",
+  "working_dir": ".",
   "shell": {
   	"command": "ssh",
   	"args": [
-  		"${USER}@${HOST}"
+  		"${agent_user}@${HOST}"
   	],
   	"onConnect" : {
 	  	"responses": {
-	  		"password": "${PASSWORD}" 
+	  		"[pP]assword": "${agent_password}",
+  			"passphrase": "knowhow"
 	  	},
   		"waitForPrompt" : "[$]"
   	},
@@ -21,17 +22,23 @@ sshJob = {
   	}
   },
   "options": {
-    "timeoutms": 3600
+    "timeoutms": 10000
+  },
+  "env": {
+  	"agent_user": "johnfelten",
+  	"HOST": "localhost",
+  	agent_password: "@rtt3chn0l0gy"
   },
   "files": [],
-	script: {
+  "script": {
 		"env": {
-      		USER: 'pi',
-      		PASSWORD: '',
-      		HOST: '',
-    	},
+	  		"USER123": "${agent_user}",
+  			"TEST_DIR": "${working_dir}/test"
+		},
 		commands: [
-
+			{	
+				"command": "echo $TEST_DIR"
+			},
 			{
 				command: 'ls'
 			},
@@ -70,7 +77,12 @@ knowhowShell.on('job-update', function(job) {
 	console.log(job.id +' progress = '+job.progress);
 });
 
-
-knowhowShell.executeJob(sshJob, function(err) {
-	assert.ifError(err);
-});
+try {
+	knowhowShell.executeJob(sshJob, function(err) {
+		assert.ifError(err);
+		process.exit(0);
+	});
+} catch (err) {
+	console.log(err.message);
+	console.log(err.stack);
+}

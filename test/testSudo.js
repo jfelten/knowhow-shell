@@ -18,14 +18,12 @@ sudoJob = {
   		"command": "exit"
   	}
   },
-  "options": {
-    "timeoutms": 3600
-  },
   "files": [],
 	script: {
 		"env": {
       		SUDO_USER: 'vip',
-      		PASSWORD: 'password'
+      		PASSWORD: 'my_password',
+      		"PATH": "/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin"
     	},
 		commands: [
 
@@ -70,4 +68,5 @@ knowhowShell.on('job-update', function(job) {
 
 knowhowShell.executeJob(sudoJob, function(err) {
 	assert.ifError(err);
+	console.log("done");
 });

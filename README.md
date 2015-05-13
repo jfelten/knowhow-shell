@@ -250,4 +250,19 @@ We have no control over what the host system will do, and sometimes we need to s
 
 ## [More advanced examples](https://github.com/jfelten/knowhow_example_repo)
 
+## tty pooling
+
+tty objects are heavy and expensive.  Most operating systems limit the number of ttys used simultaneously for good reason.  We also found that pty.js becomes unstable after openiung 50 tty objects in a single node runtime.  For this reason we have introduced a tty-pool based on [generic=pool](https://github.com/coopernurse/node-pool).  Jobs work the same way except we use the executeJobWithPool.  The foctory method for TTYPool takes 2 arguments (min, max);
+
+		var KnowhowShell = require('../knowhow-shell.js');
+		var knowhowShell = new KnowhowShell();
+		var ttyPool = new require('../tty-pool')(2,10); // create pool with a minimum of 2 ttys and a max of 10.
+		knowhowShell.executeJobWithPool(ttyPool, myJob, function(err, scriptRuntime) {
+			console.log("done...........");
+			if (err) {
+				console.log(err.message);
+				console.log(err.stack);
+			}
+		});
+
 Please visit the [knowhow example repository project](https://github.com/jfelten/knowhow_example_repo) to see examples of actual production jobs.
