@@ -60,7 +60,7 @@ npmInitJob = {
 	}
 };
 
-knowhowShell.executeJobWithPool(ttyPool, npmInitJob, function(err) {
+knowhowShell.executeJobWithPool(ttyPool, npmInitJob, function(err,runtimeOutput) {
 	console.log("done...........");
 	if (err) {
 		console.log(err.message);
