@@ -1,6 +1,6 @@
 
 
-# knowhow-shell
+# knowhow-shell [![Build Status](https://travis-ci.org/jfelten/knowhow-shell.svg?branch=master)](https://travis-ci.org/jfelten/knowhow-shell)
 knowhow-shell is an interpreter that runs script based jobs with a full tty.  When automating there are certain programs such as ssh that need a tty, and don't work well by spawing a child process.  Fortunately there is a nifty project called [pty.js](https://github.com/chjj/pty.js) that exposes a tty as a read and write streams that is the basis for this project.  All jobs are represented as a knowhow job json object, which is mostly self explanatory.  To emulate unix expect functionality simply define a repsonses section in each command:
 
     {
