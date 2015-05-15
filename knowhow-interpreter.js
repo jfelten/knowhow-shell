@@ -347,7 +347,6 @@ var setEnv = function(job, callback) {
 		}
 		job.status='Timed out';
 		eventEmitter.emit('job-error',job);
-		cancelJob(job);
 		term.end();
 		if (callback) {
 			callback(new Error("timed out: "+job.id), scriptRuntime);

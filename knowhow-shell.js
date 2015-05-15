@@ -59,9 +59,16 @@ var executeJob = function(job, callback) {
 var executeJobWithPool = function(ttyPool, job, callback) {
 	ttyPool.acquire( function(err, term) {
 		console.log("term="+term);
+		jobsInProgress[job.id] = job;
 		knowhowInterpreter.executeJobOnTerm(term, job, eventEmitter, function(err, scriptRuntime) {
-			ttyPool.release(term);
-			callback(err, scriptRuntime);
+			if (err) {
+				cancelJob(job);
+				ttyPool.release(term);
+				callback(err, scriptRuntime);
+			}	else {	
+				ttyPool.release(term);
+				callback(undefined, scriptRuntime);
+			}
 		});
 	});
 }
