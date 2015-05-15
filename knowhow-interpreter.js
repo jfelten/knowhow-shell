@@ -373,7 +373,7 @@ var setEnv = function(job, callback) {
 			}
 			return;
 		}
-		console.log(job.id+" environment set.");
+		//console.log(job.id+" environment set.");
 		
 		var shell="bash";
 		var args = [];
@@ -535,13 +535,13 @@ var setEnv = function(job, callback) {
 		
 		
 		
-		//console.log(job);
+		console.log(job);
 		async.eachSeries(job.script.commands, function(command,callback) {
 			//if (!term || term.total <1) {
 			//	callback(new Error("unable to access term"));
 			//}
 			scriptRuntime.currentStep++;
-			//console.log(command);
+			console.log(command);
 			command.callback = callback;
 			command.output = '';
 			if (command.waitForPrompt) {
