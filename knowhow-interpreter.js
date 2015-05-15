@@ -349,7 +349,7 @@ var setEnv = function(job, callback) {
 		eventEmitter.emit('job-error',job);
 		term.end();
 		if (callback) {
-			callback(new Error("timed out: "+job.id), scriptRuntime);
+			callback(new Error("timed out: "+job.id), undefined);
 		}
 	},timeoutms);
 	if (job.options && job.options.timeoutms) {
