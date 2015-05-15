@@ -6,6 +6,8 @@ var retCodeRE = /\#ret-code:\d+/;
 var promptRE = /~~KHshell~~/;
 //var promptRE = new RegExp(knowhowShellPrompt);
 
+var progressCheck;
+
 var setEnv = function(job, callback) {
 	//console.log("setting environment");
 	if (!job || !job.script) {
@@ -283,10 +285,11 @@ var setEnv = function(job, callback) {
 						}
 					});
 				} else {
+					//console.log("replaced shell variables");
 					cb();
 				}
 			}, function(cb) {
-			
+				
 				try{
 				
 					for (commandIndex in job.script.commands) {
@@ -295,14 +298,18 @@ var setEnv = function(job, callback) {
 							async.each(Object.keys(command.responses), function( response, rcb) {
 								executeReplaceVars(job.script.commands[commandIndex].responses[response],function(err, val) {
 									job.script.commands[commandIndex].responses[response]=val;
-									//console.log("response: "+response+"="+val);
+									console.log("response: "+response+"="+val);
 									rcb();
 								});
 							}, function(err) {
 								if (err) {
 									cb(err);
-								} 
+								}  else {
+									//cb();
+								}
 							});
+						} else {
+							//cb();
 						}
 
 					}
@@ -320,7 +327,7 @@ var setEnv = function(job, callback) {
 				}
 				return;
 			} else {
-				//console.log("env completed");
+				console.log("env completed");
 				if(callback) {
 					callback();
 				}
