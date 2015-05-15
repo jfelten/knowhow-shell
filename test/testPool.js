@@ -65,8 +65,9 @@ knowhowShell.executeJobWithPool(ttyPool, npmInitJob, function(err,runtimeOutput)
 	if (err) {
 		console.log(err.message);
 		console.log(err.stack);
+		throw err;
 	}
-	console.assertTrue((err),err.message);
+	//console.assertTrue((err),err.message);
 });
 
 

@@ -94,9 +94,12 @@ knowhowShell.executeJob(npmInitJob, function(err) {
 	if (err) {
 		console.log(err.message);
 		console.log(err.stack);
+		throw err;
 	}
-	assert.ifError(err);
+	
 });
+
+
 
 
 
