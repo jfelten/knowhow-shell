@@ -36,7 +36,126 @@ sampleJob = {<br>
 &thinsp;&thinsp;&thinsp;"responses": { <br>
 &thinsp;&thinsp;&thinsp;&thinsp;"[Pp]assword": "${PASSWORD}"  <b>For example send password if asked</b><br>
 &thinsp;&thinsp;&thinsp;},<br>
-&thinsp;&thinsp;&thinsp;"waitForPrompt" : "[$#]" <b>Wait for the prompt '$' or '#' to appear</b><br>
+&thinsp;&thinsp;&thinsp;"waitForPrompt" : "[$#]" <b>Wait for the prompt '
+
+##commits since last release
+		autogenerate README.ms on build
+ 		added README.json for README template generation
+ 		corrected test call
+ 		Merge remote-tracking branch 'origin/master'
+ 		refactored code to support added tty pooling - fixed concurrency issues with mulitple shells running in the same node runtime
+ 		0.1.26
+ 		fixed bad parameters issue
+ 		0.1.25
+ 		Merge remote-tracking branch 'origin/master'
+ 		0.1.24
+ 		fix issue with incorrect variable substituion
+ 		Merge remote-tracking branch 'origin/master'
+ 		0.1.23
+ 		0.1.22
+ 		don't error out if an invalid variable
+ 		Merge remote-tracking branch 'origin/master'
+ 		0.1.21
+ 		fix flaw with onExit commands
+ 		Merge remote-tracking branch 'origin/master'
+ 		added top level env file for variables not referenced by shell
+ 		0.1.20
+ 		Merge remote-tracking branch 'origin/master'
+ 		0.1.19
+ 		fix error with environment variables
+ 		Update README.md
+ 		added refactored shell class that resuses tty object for increased performance. Moved variable interpretation to knowhow-interpretter file
+ 		0.1.18
+ 		fix runtime error when timeoutms is not specified
+ 		0.1.17
+ 		fixed issue where missing onConnect causes shell not to get applied
+ 		0.1.16
+ 		Merge remote-tracking branch 'origin/master'
+ 		update examples
+ 		fix recursive callback issue for multiple variable substitution
+ 		Update README.md
+ 		Update README.md
+ 		0.1.15
+ 		Merge remote-tracking branch 'origin/master'
+ 		make sure objects are strings before trying to match them to RegEx
+ 		Update README.md
+ 		Update README.md
+ 		Update README.md
+ 		Update README.md
+ 		Update README.md
+ 		0.1.14
+ 		0.1.13
+ 		Merge remote-tracking branch 'origin/master'
+ 		added underscore
+ 		0.1.12
+ 		0.1.11
+ 		Update README.md
+ 		Update README.md
+ 		Update README.md
+ 		added error conditions, enabled timeout, add graceful handling of shell start errors instead of hanging forever.
+ 		Merge remote-tracking branch 'origin/master'
+ 		fix invalid variable uncaguht exception
+ 		0.1.10
+ 		fix cancel
+ 		fixes for failure to start
+ 		fix onExit missing values
+ 		Merge remote-tracking branch 'origin/master'
+ 		fixed variable setting, added callback in case of environment error
+ 		0.1.9
+ 		Merge remote-tracking branch 'origin/master'
+ 		0.1.8
+ 		Merge remote-tracking branch 'origin/master'
+ 		updated
+ 		Update package.json
+ 		added undefined check for job.shell.onExit and job.shell.onConnect
+ 		0.1.7
+ 		Merge remote-tracking branch 'origin/master'
+ 		fix onExit error when not defined
+ 		Update README.md
+ 		0.1.6
+ 		Update README.md
+ 		Update README.md
+ 		added missing shell check onExit
+ 		added onConenct and onExit blocks in the shell element for better control
+ 		0.1.5
+ 		Merge remote-tracking branch 'origin/master'
+ 		added process exit to avoid hanging processes
+ 		0.1.4
+ 		updated version
+ 		Merge remote-tracking branch 'origin/master'
+ 		added logic to properly exit from bash shell to prevent hanging sessions
+ 		Update README.md
+ 		Update README.md
+ 		Update README.md
+ 		added ssh example
+ 		added shell component to specify exact shell parameters like an ssh section. Fixed recursive variable substituion alogrithm.
+ 		0.1.2
+ 		fix multiple variable substituion bug
+ 		0.1.1
+ 		added ability to pass in event emitter
+ 		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
+ 		0.1.0
+ 		updated test
+ 		Update README.md
+ 		readd test dir
+ 		remove from project
+ 		remove from project
+ 		add callback machanism, Fix response mapping add another example.
+ 		Merge remote-tracking branch 'origin/master'
+ 		Update README.md
+ 		added package.js
+ 		Update README.md
+ 		Update README.md
+ 		Update README.md
+ 		Update README.md
+ 		Update README.md
+ 		Update README.md
+ 		Update README.md
+ 		correct directory structure
+ 		initial add
+ 		initial add
+ 0.1.26..HEAD
+ or '#' to appear</b><br>
 &thinsp;&thinsp;},<br>
 &thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
 &thinsp;&thinsp;&thinsp;"command": "exit"<br>
@@ -252,7 +371,7 @@ We have no control over what the host system will do, and sometimes we need to s
 
 ## tty pooling
 
-tty objects are heavy and expensive.  Most operating systems limit the number of ttys used simultaneously for good reason.  We also found that pty.js becomes unstable after openiung 50 tty objects in a single node runtime.  For this reason we have introduced a tty-pool based on [generic=pool](https://github.com/coopernurse/node-pool).  Jobs work the same way except we use the executeJobWithPool.  The foctory method for TTYPool takes 2 arguments (min, max);
+tty objects are heavy and expensive.  Most operating systems limit the number of ttys used simultaneously for good reason.  We also found that pty.js becomes unstable after openiung 50 tty objects.  For this reason we have introduced a tty-pool based on [generic=pool](https://github.com/coopernurse/node-pool).  Jobs work the same way except we use the executeJobWithPool.  The foctory method for TTYPool takes 2 arguments (min, max);
 
 		var KnowhowShell = require('../knowhow-shell.js');
 		var knowhowShell = new KnowhowShell();
@@ -266,3 +385,7 @@ tty objects are heavy and expensive.  Most operating systems limit the number of
 		});
 
 Please visit the [knowhow example repository project](https://github.com/jfelten/knowhow_example_repo) to see examples of actual production jobs.
+
+
+##commits since last release
+#include "git_commit.md"
