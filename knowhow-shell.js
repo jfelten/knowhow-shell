@@ -8,7 +8,7 @@ var knowhowInterpreter = require('./knowhow-interpreter');
 
 
 var jobsInProgress = {};
-var progressCheck;
+
 
 var cancelJob = function(job) {
 	if (progressCheck) {

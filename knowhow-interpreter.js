@@ -373,7 +373,7 @@ var setEnv = function(job, callback) {
 			}
 			return;
 		}
-		//console.log(job.id+" environment set.");
+		console.log(job.id+" environment set.");
 		
 		var shell="bash";
 		var args = [];
