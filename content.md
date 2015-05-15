@@ -12,6 +12,8 @@ knowhow-shell is an interpreter that runs script based jobs with a full tty.  Wh
 
 This will send the string $GIT_PASSWORD to the terminal when prompted with a string that matches 'password'.
 
+NOTE - incompatible with node 0.11.x  ( verified working in 0.10.x and 0.12.x)  See [joyent#8468](https://github.com/joyent/node/issues/8468)
+
 # Installation
 
     npm install knowhow-shell
