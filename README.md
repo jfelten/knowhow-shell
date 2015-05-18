@@ -1,6 +1,6 @@
 
 
-# knowhow-shell[![Build Status](https://travis-ci.org/jfelten/knowhow-shell.svg?branch=master)](https://travis-ci.org/jfelten/knowhow-shell)
+# knowhow-shell [![Build Status](https://travis-ci.org/jfelten/knowhow-shell.svg?branch=master)](https://travis-ci.org/jfelten/knowhow-shell)
 knowhow-shell is an interpreter that runs script based jobs with a full tty.  When automating there are certain programs such as ssh that need a tty, and don't work well by spawing a child process.  Fortunately there is a nifty project called [pty.js](https://github.com/chjj/pty.js) that exposes a tty as a read and write streams that is the basis for this project.  All jobs are represented as a knowhow job json object, which is mostly self explanatory.  To emulate unix expect functionality simply define a repsonses section in each command:
 
     {
@@ -11,6 +11,8 @@ knowhow-shell is an interpreter that runs script based jobs with a full tty.  Wh
     }
 
 This will send the string $GIT_PASSWORD to the terminal when prompted with a string that matches 'password'.
+
+NOTE - incompatible with node 0.11.x  ( verified working in 0.10.x and 0.12.x)  See [joyent#8468](https://github.com/joyent/node/issues/8468)
 
 # Installation
 
@@ -39,7 +41,24 @@ sampleJob = {<br>
 &thinsp;&thinsp;&thinsp;"waitForPrompt" : "[$#]" <b>Wait for the prompt '
 
 ##commits since last release
-		autogenerate README.ms on build
+
+		added travis build icon
+ 		Update README.md
+ 		added a note about 0.11 tty bug
+ 		removed logging debug since we determined 0.11 has a critical bug that prevents knowhow-shell from working
+ 		continue debugging 0.11 on travis
+ 		attempt to debug node 11 build failures
+ 		setEnv fixes and timeout fixes
+ 		fix time out error
+ 		fixed timed out jobs for running in a tty pool
+ 		updated test to work on travis systems
+ 		update test scripts
+ 		updated test scripts
+ 		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
+ 		fixed travis.yml build
+ 		0.1.27
+ 		README autobuild for version:
+ 		autogenerate README.ms on build
  		added README.json for README template generation
  		corrected test call
  		Merge remote-tracking branch 'origin/master'
@@ -154,7 +173,7 @@ sampleJob = {<br>
  		correct directory structure
  		initial add
  		initial add
- 0.1.26..HEAD
+ 0.1.27..HEAD
  or '#' to appear</b><br>
 &thinsp;&thinsp;},<br>
 &thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
@@ -388,4 +407,5 @@ Please visit the [knowhow example repository project](https://github.com/jfelten
 
 
 ##commits since last release
+
 #include "git_commit.md"
