@@ -347,21 +347,7 @@ var setEnv = function(job, callback) {
   * @param callback
   */
  var executeJobOnTerm = function(term, job, eventEmitter, callback) {
-	var timeoutms = 120000;
-	var timeout = setTimeout(function() {
-		if (progressCheck) {
-			clearInterval(progressCheck);
-		}
-		job.status='Timed out';
-		eventEmitter.emit('job-error',job);
-		term.end();
-		if (callback) {
-			callback(new Error("timed out: "+job.id), undefined);
-		}
-	},timeoutms);
-	if (job.options && job.options.timeoutms) {
-		timeoutms = job.options.timeoutms;
-	}
+	
 	
 	setEnv(job, function(err) {
 		
@@ -520,7 +506,7 @@ var setEnv = function(job, callback) {
 		term.on('error', function(err) {
 			//console.log(err.message);
 			clearInterval(progressCheck);
-			clearTimeout(timeout);
+			//clearTimeout(timeout);
 			term.end();
 			delete scriptRuntime.currentCommand;
 			if (callback && !job.complete) {
@@ -582,7 +568,7 @@ var setEnv = function(job, callback) {
 					//job.status=err.message;
 					eventEmitter.emit('job-error',job);
 					clearInterval(progressCheck);
-					clearTimeout(timeout);
+					//clearTimeout(timeout);
 					
 					//term.end();
 					if (callback) {
@@ -597,7 +583,7 @@ var setEnv = function(job, callback) {
 				
 				
 				clearInterval(progressCheck);
-				clearTimeout(timeout);
+				//clearTimeout(timeout);
 		        exitCommand(function() {
 					//term.end();
 					delete scriptRuntime.currentCommand;

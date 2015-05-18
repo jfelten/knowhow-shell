@@ -14,8 +14,8 @@ var cancelJob = function(job) {
 	if (progressCheck) {
 		clearInterval(progressCheck);
 	}
-	if (timeout) {
-		clearTimeout(timeout);
+	if (jobsInProgress[job.id] && jobsInProgress[job.id].job && jobsInProgress[job.id].job.timeout) {
+		clearTimeout(jobsInProgress[job.id].job.timeout);
 	}
 	if (job && job.id) {
 
@@ -40,9 +40,30 @@ var executeJob = function(job, callback) {
 		  env: job.script.env
 		});
 	term.write('\r');
-	jobsInProgress[job.id] = job;
+	
 	console.log(term.process);
+	var timeoutms = 120000;
+	if (job.options && job.options.timeoutms) {
+		timeoutms = job.options.timeoutms;
+	}
+	var timeout = setTimeout(function() {
+		if (progressCheck) {
+			clearInterval(progressCheck);
+		}
+		job.status='Timed out';
+		eventEmitter.emit('job-error',job);
+		term.end();
+		if (callback) {
+			callback(new Error("timed out: "+job.id), undefined);
+		}
+	},timeoutms);
+	job.timeout=timeout;
+	jobsInProgress[job.id] = job;
+	
 	knowhowInterpreter.executeJobOnTerm(term, job, eventEmitter, function(err, scriptRuntime) {
+		if (err) {
+			clearTimeout(timeout);
+		}
 		term.end();
 		delete jobsInProgress[job.id];
 		callback(err, scriptRuntime);
