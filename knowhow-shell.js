@@ -11,19 +11,18 @@ var jobsInProgress = {};
 
 
 var cancelJob = function(job) {
-	if (progressCheck) {
-		clearInterval(progressCheck);
+	if (job) {
+		if (jobsInProgress[job.id] && jobsInProgress[job.id].job && jobsInProgress[job.id].job.timeout) {
+			clearTimeout(jobsInProgress[job.id].job.timeout);
+		}
+		if (job && job.id) {
+	
+			delete jobsInProgress[job.id];
+		}
+		if (job && job.id && jobsInProgress[job.id] && jobsInProgress[job.id].term) {
+			jobsInProgress[job.id].term.exit();
+		}	
 	}
-	if (jobsInProgress[job.id] && jobsInProgress[job.id].job && jobsInProgress[job.id].job.timeout) {
-		clearTimeout(jobsInProgress[job.id].job.timeout);
-	}
-	if (job && job.id) {
-
-		delete jobsInProgress[job.id];
-	}
-	if (job && job.id && jobsInProgress[job.id] && jobsInProgress[job.id].term) {
-		jobsInProgress[job.id].term.exit();
-	}	
 };
 
 /**
@@ -47,9 +46,9 @@ var executeJob = function(job, callback) {
 		timeoutms = job.options.timeoutms;
 	}
 	var timeout = setTimeout(function() {
-		if (progressCheck) {
-			clearInterval(progressCheck);
-		}
+		//if (progressCheck) {
+		//	clearInterval(progressCheck);
+		//}
 		job.status='Timed out';
 		eventEmitter.emit('job-error',job);
 		term.end();
