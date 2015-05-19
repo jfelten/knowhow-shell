@@ -42,8 +42,12 @@ sampleJob = {<br>
 
 ##commits since last release
 
-		0.1.29
+		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
+ 		0.1.30
  		README autobuild for version:
+ 		0.1.29
+ 		README autobuild for version:
+ 		fix cancel timeout bug
  		updated node compatibility version
  		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
  		added node version dependency to prevent running on 0.11
@@ -180,7 +184,7 @@ sampleJob = {<br>
  		correct directory structure
  		initial add
  		initial add
- 0.1.29..HEAD
+ 0.1.30..HEAD
  or '#' to appear</b><br>
 &thinsp;&thinsp;},<br>
 &thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
