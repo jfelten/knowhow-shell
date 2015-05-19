@@ -42,7 +42,12 @@ sampleJob = {<br>
 
 ##commits since last release
 
-		added travis build icon
+		updated node compatibility version
+ 		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
+ 		added node version dependency to prevent running on 0.11
+ 		0.1.28
+ 		README autobuild for version:
+ 		added travis build icon
  		Update README.md
  		added a note about 0.11 tty bug
  		removed logging debug since we determined 0.11 has a critical bug that prevents knowhow-shell from working
@@ -173,7 +178,7 @@ sampleJob = {<br>
  		correct directory structure
  		initial add
  		initial add
- 0.1.27..HEAD
+ 0.1.28..HEAD
  or '#' to appear</b><br>
 &thinsp;&thinsp;},<br>
 &thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
