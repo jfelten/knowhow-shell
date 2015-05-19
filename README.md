@@ -42,7 +42,9 @@ sampleJob = {<br>
 
 ##commits since last release
 
-		updated node compatibility version
+		0.1.29
+ 		README autobuild for version:
+ 		updated node compatibility version
  		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
  		added node version dependency to prevent running on 0.11
  		0.1.28
@@ -178,7 +180,7 @@ sampleJob = {<br>
  		correct directory structure
  		initial add
  		initial add
- 0.1.28..HEAD
+ 0.1.29..HEAD
  or '#' to appear</b><br>
 &thinsp;&thinsp;},<br>
 &thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
