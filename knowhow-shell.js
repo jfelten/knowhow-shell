@@ -15,12 +15,17 @@ var cancelJob = function(job) {
 		if (jobsInProgress[job.id] && jobsInProgress[job.id].job && jobsInProgress[job.id].job.timeout) {
 			clearTimeout(jobsInProgress[job.id].job.timeout);
 		}
+		if (jobsInProgress[job.id] && jobsInProgress[job.id].job && jobsInProgress[job.id].job.progressCheck) {
+			clearInterval(jobsInProgress[job.id].job.progressCheck);
+		}
 		if (job && job.id) {
 	
 			delete jobsInProgress[job.id];
 		}
 		if (job && job.id && jobsInProgress[job.id] && jobsInProgress[job.id].term) {
-			jobsInProgress[job.id].term.exit();
+			console.log("ending shell for "+job.id);
+			//jobsInProgress[job.id].term.removeAllListeners();
+			//jobsInProgress[job.id].term.exit();
 		}	
 	}
 };
@@ -57,15 +62,23 @@ var executeJob = function(job, callback) {
 		}
 	},timeoutms);
 	job.timeout=timeout;
+	progressCheck = setInterval(function() {
+		    job.progress++;
+		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
+	
+		},5000);
+	job.progressCheck = progressCheck;
 	jobsInProgress[job.id] = job;
 	
 	knowhowInterpreter.executeJobOnTerm(term, job, eventEmitter, function(err, scriptRuntime) {
-		if (err) {
-			clearTimeout(timeout);
-		}
+
 		term.end();
+		clearTimeout(timeout);
+		clearInterval(progressCheck);
 		delete jobsInProgress[job.id];
 		callback(err, scriptRuntime);
+		
+		
 	});
 }
 
@@ -78,17 +91,43 @@ var executeJob = function(job, callback) {
  */
 var executeJobWithPool = function(ttyPool, job, callback) {
 	ttyPool.acquire( function(err, term) {
+	
+		var timeoutms = 120000;
+		if (job.options && job.options.timeoutms) {
+			timeoutms = job.options.timeoutms;
+		}
+		var timeout = setTimeout(function() {
+			//if (progressCheck) {
+			//	clearInterval(progressCheck);
+			//}
+			job.status='Timed out';
+			eventEmitter.emit('job-error',job);
+			term.end();
+			if (callback) {
+				callback(new Error("timed out: "+job.id), undefined);
+			}
+		},timeoutms);
+		progressCheck = setInterval(function() {
+		    job.progress++;
+		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
+	
+		},5000);
+		job.progressCheck = progressCheck;
 		console.log("term="+term);
 		jobsInProgress[job.id] = job;
 		knowhowInterpreter.executeJobOnTerm(term, job, eventEmitter, function(err, scriptRuntime) {
 			if (err) {
 				cancelJob(job);
-				ttyPool.release(term);
 				callback(err, scriptRuntime);
 			}	else {	
-				ttyPool.release(term);
+				
 				callback(undefined, scriptRuntime);
 			}
+			clearTimeout(timeout);
+			clearInterval(progressCheck);
+			term.removeAllListeners();
+			ttyPool.release(term);
+			delete jobsInProgress[job.id];
 		});
 	});
 }

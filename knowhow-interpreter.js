@@ -26,11 +26,20 @@ var setEnv = function(job, callback) {
 	//job.script.env.PROMPT_COMMAND=knowhowShellPromptCommand;
 	
 	//add the process.env to job.env
-	//for (envVar in process.env) {
-	//	if (!job.script.env[envVar]) {
-	//		job.script.env[envVar] = process.env[envVar];
-	//	}
-	//}
+	for (envVar in process.env) {
+		if ((job.script.env && !job.script.env[envVar]) && (job.env && !job.env[envVar])) {
+			job.script.env[envVar] = process.env[envVar];
+		} else {
+			console.log("prepending "+process.env[envVar]+" to: "+envVar);
+			if (job.script.env && job.script.env[envVar]) {
+				console.log("prepending "+process.env[envVar]+" to: "+envVar);
+				job.script.env[envVar] = process.env[envVar]+require("path").delimiter+job.script.env[envVar];
+			} else if (job.env && job.env[envVar]) {
+				console.log("prepending "+process.env[envVar]+" to: "+envVar);
+				job.env[envVar] = process.env[envVar]+require("path").delimiter+job.env[envVar];
+			}
+		}
+	}
 
 	
 	replaceVar = function(regEx,searchString, envHash, rvCB) {
@@ -475,11 +484,12 @@ var setEnv = function(job, callback) {
 			  	scriptRuntime.currentCommand.returnCode = scriptRuntime.currentCommand.output.match(retCodeRE)[0].split(":")[1];
 			  	scriptRuntime.currentCommand.output=scriptRuntime.currentCommand.output.replace(knowhowShellPrompt,"")
 			  		.replace(retCodeRE,"").replace(scriptRuntime.currentCommand.command,"").trim();
-			  	//console.log('return code: '+scriptRuntime.currentCommand.returnCode);
+			  	console.log('return code: '+scriptRuntime.currentCommand.returnCode);
 			  	if (scriptRuntime.currentCommand.returnCode != 0) {
-					term.write(':\r')
+					//term.write(':\r')
 			  		eventEmitter.emit('execution-error',scriptRuntime.currentCommand);
 			  		scriptRuntime.currentCommand.callback(new Error(scriptRuntime.currentCommand.output));
+			  		return;
 			  	} else {
 			  		eventEmitter.emit('execution-complete', scriptRuntime.currentCommand);
 			  		
@@ -504,8 +514,8 @@ var setEnv = function(job, callback) {
 		  
 		});
 		term.on('error', function(err) {
-			//console.log(err.message);
-			clearInterval(progressCheck);
+			console.log("pty.js error: "+err.message);
+			//clearInterval(progressCheck);
 			//clearTimeout(timeout);
 			term.end();
 			delete scriptRuntime.currentCommand;
@@ -513,11 +523,7 @@ var setEnv = function(job, callback) {
 				callback(err, scriptRuntime);
 			}
 		});
-		progressCheck = setInterval(function() {
-		    job.progress++;
-		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
-	
-		},5000);
+		
 		
 		
 		
@@ -567,9 +573,9 @@ var setEnv = function(job, callback) {
 					job.progress=0;
 					//job.status=err.message;
 					eventEmitter.emit('job-error',job);
-					clearInterval(progressCheck);
+					//clearInterval(progressCheck);
 					//clearTimeout(timeout);
-					
+					term.removeAllListeners();
 					//term.end();
 					if (callback) {
 						callback(err, scriptRuntime);
@@ -582,7 +588,7 @@ var setEnv = function(job, callback) {
 				
 				
 				
-				clearInterval(progressCheck);
+				//clearInterval(progressCheck);
 				//clearTimeout(timeout);
 		        exitCommand(function() {
 					//term.end();
@@ -590,6 +596,7 @@ var setEnv = function(job, callback) {
 			    	if (callback) {
 						callback(undefined, scriptRuntime);
 					}
+					//term.removeAllListeners();
 					console.log("knowhow-shell done");
 				});
 				
