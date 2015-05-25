@@ -1,6 +1,6 @@
 {
   "name": "knowhow-shell",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "description": "An interpreter to run automated shell jobs",
   "engines": {
     "node": "<0.11.0 >0.12"

@@ -43,6 +43,10 @@ sampleJob = {<br>
 ##commits since last release
 
 		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
+ 		0.1.31
+ 		README autobuild for version:
+ 		fix cancel errors
+ 		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
  		0.1.30
  		README autobuild for version:
  		0.1.29
@@ -184,7 +188,7 @@ sampleJob = {<br>
  		correct directory structure
  		initial add
  		initial add
- 0.1.30..HEAD
+ 0.1.31..HEAD
  or '#' to appear</b><br>
 &thinsp;&thinsp;},<br>
 &thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
