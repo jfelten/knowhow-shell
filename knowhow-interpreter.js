@@ -31,10 +31,10 @@ var setEnv = function(job, callback) {
 			job.script.env[envVar] = process.env[envVar];
 		} else {
 			console.log("prepending "+process.env[envVar]+" to: "+envVar);
-			if (job.script.env && job.script.env[envVar]) {
+			if (envVar=="PATH" && job.script.env && job.script.env[envVar]) {
 				console.log("prepending "+process.env[envVar]+" to: "+envVar);
 				job.script.env[envVar] = process.env[envVar]+require("path").delimiter+job.script.env[envVar];
-			} else if (job.env && job.env[envVar]) {
+			} else if (envVar=="PATH" && job.env && job.env[envVar]) {
 				console.log("prepending "+process.env[envVar]+" to: "+envVar);
 				job.env[envVar] = process.env[envVar]+require("path").delimiter+job.env[envVar];
 			}
