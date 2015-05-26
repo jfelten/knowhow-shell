@@ -492,10 +492,10 @@ var setEnv = function(job, callback) {
 			  		return;
 			  	} else {
 			  		eventEmitter.emit('execution-complete', scriptRuntime.currentCommand);
-			  		
+			  		scriptRuntime.currentCommand.callback();
 			  	}
 			  	console.log("completed: "+scriptRuntime.currentCommand.command);
-			  	scriptRuntime.currentCommand.callback();
+			  	
 			  	
 			  }
 			  
