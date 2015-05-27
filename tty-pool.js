@@ -10,12 +10,17 @@ function createPool(minSize, maxSize) {
 	    create   : function(callback) {
 	    	var shell="bash";
 			var args = [];
-	    	var term = pty.spawn(shell, args, {
-			  name: 'xterm-color',
-			  cols: 80,
-			  rows: 30
-			});
-			callback(undefined,term);
+			try {
+		    	var term = pty.spawn(shell, args, {
+				  name: 'xterm-color',
+				  cols: 80,
+				  rows: 30
+				});
+				callback(undefined,term);
+			} catch (err) {
+				console.error(err.stack);
+				callback(err);
+			}
 	
 	    },
 	    destroy  : function(term) {

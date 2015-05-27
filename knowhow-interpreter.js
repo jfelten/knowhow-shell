@@ -494,7 +494,7 @@ var setEnv = function(job, callback) {
 			  		eventEmitter.emit('execution-complete', scriptRuntime.currentCommand);
 			  		scriptRuntime.currentCommand.callback();
 			  	}
-			  	console.log("completed: "+scriptRuntime.currentCommand.command);
+			  	
 			  	
 			  	
 			  }
