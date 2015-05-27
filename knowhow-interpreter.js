@@ -26,17 +26,19 @@ var setEnv = function(job, callback) {
 	//job.script.env.PROMPT_COMMAND=knowhowShellPromptCommand;
 	
 	//add the process.env to job.env
-	for (envVar in process.env) {
-		if ((job.script.env && !job.script.env[envVar]) && (job.env && !job.env[envVar])) {
-			job.script.env[envVar] = process.env[envVar];
-		} else {
-			console.log("prepending "+process.env[envVar]+" to: "+envVar);
-			if (envVar=="PATH" && job.script.env && job.script.env[envVar]) {
+	if (!job.shell) {
+		for (envVar in process.env) {
+			if ((job.script.env && !job.script.env[envVar]) && (job.env && !job.env[envVar])) {
+				job.script.env[envVar] = process.env[envVar];
+			} else {
 				console.log("prepending "+process.env[envVar]+" to: "+envVar);
-				job.script.env[envVar] = process.env[envVar]+require("path").delimiter+job.script.env[envVar];
-			} else if (envVar=="PATH" && job.env && job.env[envVar]) {
-				console.log("prepending "+process.env[envVar]+" to: "+envVar);
-				job.env[envVar] = process.env[envVar]+require("path").delimiter+job.env[envVar];
+				if (envVar=="PATH" && job.script.env && job.script.env[envVar]) {
+					console.log("prepending "+process.env[envVar]+" to: "+envVar);
+					job.script.env[envVar] = process.env[envVar]+require("path").delimiter+job.script.env[envVar];
+				} else if (envVar=="PATH" && job.env && job.env[envVar]) {
+					console.log("prepending "+process.env[envVar]+" to: "+envVar);
+					job.env[envVar] = process.env[envVar]+require("path").delimiter+job.env[envVar];
+				}
 			}
 		}
 	}
