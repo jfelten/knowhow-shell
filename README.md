@@ -42,7 +42,11 @@ sampleJob = {<br>
 
 ##commits since last release
 
-		correctly append to PATH only
+		only pass in native environment variables for non shell jobs
+ 		beef up runtime exception handling
+ 		0.1.34
+ 		README autobuild for version:
+ 		correctly append to PATH only
  		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
  		0.1.33
  		README autobuild for version:
@@ -197,7 +201,7 @@ sampleJob = {<br>
  		correct directory structure
  		initial add
  		initial add
- 0.1.33..HEAD
+ 0.1.34..HEAD
  or '#' to appear</b><br>
 &thinsp;&thinsp;},<br>
 &thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
