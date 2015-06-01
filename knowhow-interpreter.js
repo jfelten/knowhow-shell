@@ -376,15 +376,18 @@ var setEnv = function(job, callback) {
 		var args = [];
 		var newCommands1 = new Array(job.script.commands.length+2);
 		newCommands1[0] ={
-			"command" : "PS1="+knowhowShellPrompt+"; PROMPT_COMMAND="+knowhowShellPromptCommand
+			"command" : "PS1="+knowhowShellPrompt+"; PROMPT_COMMAND="+knowhowShellPromptCommand,
+			"internal": true
 		};
 		newCommands1[1] = {command: ""};
+		newCommands1[1].internal=true;
 		for (env in job.script.env) {
 			if (env && env != '' && job.script.env[env] && job.script.env[env] !='') {
 				newCommands1[1].command+=env+'=\"'+job.script.env[env]+"\"";
 				if (newCommands1[1].command.slice(-1)!=';') {
 					newCommands1[1].command+='; ';
 				}
+				
 			}
 		}
 		for (index = 0; index < job.script.commands.length; index++) {
@@ -418,7 +421,8 @@ var setEnv = function(job, callback) {
 			newCommands[0] = job.script.commands[0];
 			newCommands[1] = shellCommand;
 			newCommands[2] ={
-				"command" : "PS1="+knowhowShellPrompt+"; PROMPT_COMMAND="+knowhowShellPromptCommand
+				"command" : "PS1="+knowhowShellPrompt+"; PROMPT_COMMAND="+knowhowShellPromptCommand,
+				"internal" : true
 			};
 			for (index = 1; index < job.script.commands.length; index++) {
 				//console.log(index+" "+job.script.commands[index].command);
@@ -430,7 +434,8 @@ var setEnv = function(job, callback) {
 		var scriptRuntime = {	
 			currentStep: 0,
 			output: '',
-			progressStepLength: Math.floor(100/job.script.commands.length)
+			progressStepLength: Math.floor(100/job.script.commands.length),
+			completedCommands: []
 		};
 				
 		var currentCommand;	
@@ -493,7 +498,15 @@ var setEnv = function(job, callback) {
 			  		scriptRuntime.currentCommand.callback(new Error(scriptRuntime.currentCommand.output));
 			  		return;
 			  	} else {
-			  		eventEmitter.emit('execution-complete', scriptRuntime.currentCommand);
+			  		
+			  		if (!scriptRuntime.currentCommand.internal) {
+			  			scriptRuntime.completedCommands.push( {
+				  			command: scriptRuntime.currentCommand.command,
+				  			returnCode: scriptRuntime.currentCommand.returnCode,
+				  			output: scriptRuntime.currentCommand.output
+				  		});
+			  			eventEmitter.emit('execution-complete', scriptRuntime.currentCommand);
+			  		}
 			  		scriptRuntime.currentCommand.callback();
 			  	}
 			  	
@@ -548,6 +561,9 @@ var setEnv = function(job, callback) {
 			scriptRuntime.currentCommand = command;
 			if (command.command) {
 				term.write(command.command+'\r');
+			}
+			if (!command.internal  && !(job.options && job.options.noEcho)) {
+				eventEmitter.emit('execution-start', scriptRuntime.currentCommand);
 			}
 			//term.write("wait | echo \"D_O_N_E: "+currentCommand.command+'\r');
 		    }.bind({scriptRuntime: scriptRuntime}), 

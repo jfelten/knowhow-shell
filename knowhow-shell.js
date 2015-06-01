@@ -8,7 +8,7 @@ var knowhowInterpreter = require('./knowhow-interpreter');
 
 
 var jobsInProgress = {};
-
+var jobCounter = 0;
 
 var cancelJob = function(job) {
 	if (job) {
@@ -44,7 +44,8 @@ var executeJob = function(job, callback) {
 		  env: job.script.env
 		});
 	term.write('\r');
-	
+	var jobId = job.id+jobCounter++;
+
 	console.log(term.process);
 	var timeoutms = 120000;
 	if (job.options && job.options.timeoutms) {
@@ -68,17 +69,19 @@ var executeJob = function(job, callback) {
 	
 		},5000);
 	job.progressCheck = progressCheck;
-	jobsInProgress[job.id] = job;
+	jobsInProgress[jobId] = job;
 	
 	knowhowInterpreter.executeJobOnTerm(term, job, eventEmitter, function(err, scriptRuntime) {
 
+		
 		term.end();
+		term.destroy();
+		term._close();
 		clearTimeout(timeout);
 		clearInterval(progressCheck);
-		delete jobsInProgress[job.id];
+		delete jobsInProgress[jobId];
 		callback(err, scriptRuntime);
-		
-		
+
 	});
 }
 
