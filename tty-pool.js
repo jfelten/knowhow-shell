@@ -25,6 +25,7 @@ function createPool(minSize, maxSize) {
 	    },
 	    destroy  : function(term) {
 	    	term.end();
+			term.destroy();
 	    },
 	    validate: function(term) {
 	    	return (term);
