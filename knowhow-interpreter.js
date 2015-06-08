@@ -4,6 +4,7 @@ var knowhowShellPrompt= '~~KHshell~~';
 var knowhowShellPromptCommand='\'echo "#ret-code:$?"\'';
 var retCodeRE = /\#ret-code:\d+/;
 var promptRE = /~~KHshell~~/;
+var passwordRE = /[Pp]assword/;
 //var promptRE = new RegExp(knowhowShellPrompt);
 
 var progressCheck;
@@ -454,7 +455,9 @@ var setEnv = function(job, callback) {
 		  	 if (scriptRuntime.currentCommand) {
 		  	 	scriptRuntime.currentCommand.output+=data;
 		  	 }
-		  	  
+		  	  if (job.options.promptForPassword && data.match(passwordRE)) {
+		  	  	eventEmitter.emit('execution-password-promp', scriptRuntime.currentCommand);
+		  	  }
 		  	  //console.log("responses="+scriptRuntime.currentCommand.responses);
 			  if (scriptRuntime.currentCommand && scriptRuntime.currentCommand.responses) {
 			  	_.each(scriptRuntime.currentCommand.responses, function(response, responseKey, list) {
@@ -602,7 +605,8 @@ var setEnv = function(job, callback) {
 				}
 				job.progress=0;
 				job.status=job.id+" complete";
-				eventEmitter.emit("job-complete", job);
+				
+				//eventEmitter.emit("job-complete", job);
 				
 				
 				

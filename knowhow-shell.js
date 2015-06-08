@@ -12,6 +12,9 @@ var jobCounter = 0;
 
 var cancelJob = function(job) {
 	if (job) {
+		if (job.subProcess) {
+			job.subProcess.kill('SIGTERM');
+		}
 		if (jobsInProgress[job.id] && jobsInProgress[job.id].job && jobsInProgress[job.id].job.timeout) {
 			clearTimeout(jobsInProgress[job.id].job.timeout);
 		}
@@ -57,7 +60,10 @@ var executeJob = function(job, callback) {
 		//}
 		job.status='Timed out';
 		eventEmitter.emit('job-error',job);
-		term.end();
+		term.destroy();
+		if (job.progressCheck) {
+			clearInterval(job.progressCheck);
+		}
 		if (callback) {
 			callback(new Error("timed out: "+job.id), undefined);
 		}
@@ -66,7 +72,7 @@ var executeJob = function(job, callback) {
 	progressCheck = setInterval(function() {
 		    job.progress++;
 		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
-	
+			
 		},5000);
 	job.progressCheck = progressCheck;
 	jobsInProgress[jobId] = job;
@@ -79,12 +85,89 @@ var executeJob = function(job, callback) {
 		term._close();
 		clearTimeout(timeout);
 		clearInterval(progressCheck);
+		delete job.timeout;
+		delete job.progressCheck;
+		delete job.subprocess;
+		eventEmitter.emit("job-complete", job);
 		delete jobsInProgress[jobId];
 		callback(err, scriptRuntime);
 
 	});
 }
 
+
+/**
+ * Executes a job as a subprocess instead of in the main event loop.  This method shoul be used when running multiple knowhow jobs simultaneously,
+ * because pty.js is not thread safe within the node event loop.  We have found that pty.js does not always clean up 
+ * properly after ending, which leads to resource/memory leaks.  Executing in a separate process allows us to contain this.
+ *
+ * @param job the job to execute
+ */
+var executeJobAsSubProcess = function(job) {
+
+	var cp = require('child_process');
+	
+	var subprocess = cp.fork(__dirname+'/execJob.js',[JSON.stringify(job)]);
+	var events = ['job-complete', 'job-error', 'job-cancel', 
+	'execution-start', 'execution-error','execution-password-prmopt', 'execution-complete'];
+
+	
+	/**
+	 * listen for and remit subprocess events
+	 */
+	var listenForSubProcessEvents = function(subProcess, events) {
+		subProcess.on('message', function(data) {
+			var eventType = data.eventType;
+			if (eventType =='subprocess-complete' || eventType =='job-error' || eventType =='job-cancel') {
+				
+				clearTimeout(job.timeout);
+				clearInterval(job.progressCheck);
+				delete job.timeout;
+				delete job.progressCheck;
+				delete job.subprocess;
+				eventEmitter.emit("job-complete", job);
+			}
+			//console.log("eventType="+data.eventType);
+			//console.log(data);
+			//delete data.eventType;
+			eventEmitter.emit(eventType, data);
+		});
+	};
+	listenForSubProcessEvents(subprocess,events);
+	
+
+	var timeoutms = 120000;
+	if (job.options && job.options.timeoutms) {
+		timeoutms = job.options.timeoutms;
+	}
+	var timeout = setTimeout(function() {
+		//if (progressCheck) {
+		//	clearInterval(progressCheck);
+		//}
+		job.status='Timed out';
+		eventEmitter.emit('job-error',job);
+		term.destroy();
+		if (job.progressCheck) {
+			clearInterval(job.progressCheck);
+		}
+		if (callback) {
+			callback(new Error("timed out: "+job.id), undefined);
+		}
+	},timeoutms);
+	job.timeout=timeout;
+	progressCheck = setInterval(function() {
+		    job.progress++;
+		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
+			
+		},5000);
+	job.progressCheck = progressCheck;
+	job.subProcess = subprocess;
+	jobsInProgress[job.id] = job;
+	
+
+	
+
+}
 
 /**
  * Executes a job and uses a tty from a tty pool
@@ -128,6 +211,10 @@ var executeJobWithPool = function(ttyPool, job, callback) {
 			}
 			clearTimeout(timeout);
 			clearInterval(progressCheck);
+			delete job.timeout;
+			delete job.progressCheck;
+			delete job.subprocess;
+			eventEmitter.emit("job-complete", job);
 			term.removeAllListeners();
 			ttyPool.release(term);
 			delete jobsInProgress[job.id];
@@ -144,6 +231,7 @@ function KnowhowShell(passedInEmitter) {
 
 KnowhowShell.prototype.cancelJob = cancelJob;
 KnowhowShell.prototype.executeJob = executeJob;
+KnowhowShell.prototype.executeJobAsSubProcess = executeJobAsSubProcess;
 KnowhowShell.prototype.executeJobWithPool = executeJobWithPool;
 KnowhowShell.eventEmitter = eventEmitter;
 KnowhowShell.jobsInProgress = jobsInProgress;
