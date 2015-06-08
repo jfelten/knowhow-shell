@@ -88,7 +88,7 @@ var executeJob = function(job, callback) {
 		delete job.timeout;
 		delete job.progressCheck;
 		delete job.subprocess;
-		eventEmitter.emit("job-complete", job);
+		eventEmitter.emit("job-complete", scriptRuntime);
 		delete jobsInProgress[jobId];
 		callback(err, scriptRuntime);
 
@@ -125,8 +125,8 @@ var executeJobAsSubProcess = function(job, callback) {
 				delete job.timeout;
 				delete job.progressCheck;
 				delete job.subprocess;
-				eventEmitter.emit("job-complete", job);
-				if (callback) callback(undefined, job);
+				eventEmitter.emit("job-complete", data);
+				if (callback) callback(undefined, data);
 			} else if (eventType =='job-error' || eventType =='job-cancel' ){
 				clearTimeout(job.timeout);
 				clearInterval(job.progressCheck);
@@ -222,7 +222,7 @@ var executeJobWithPool = function(ttyPool, job, callback) {
 			delete job.timeout;
 			delete job.progressCheck;
 			delete job.subprocess;
-			eventEmitter.emit("job-complete", job);
+			eventEmitter.emit("job-complete", scriptRuntime);
 			term.removeAllListeners();
 			ttyPool.release(term);
 			delete jobsInProgress[job.id];

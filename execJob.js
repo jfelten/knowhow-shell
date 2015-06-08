@@ -30,9 +30,9 @@ var events = ['job-complete', 'job-error', 'job-cancel','execution-start', 'exec
 var listenForEvents = function(knowhowShell,events) {
 	for (index in events) {
 		var event = events[index];
-		console.log(event);
+		//console.log(event);
 		knowhowShell.on(event, function(data) {
-			console.log("EVENT: "+this.event);
+			//console.log("EVENT: "+this.event);
 			data.eventType = this.event;
 			//console.log(data);
 			process.send(data);
@@ -41,7 +41,7 @@ var listenForEvents = function(knowhowShell,events) {
 }
 
 
-console.log("starting...");
+console.log("knowhow job process starting...");
 
 if (!process.argv[2]) {
 	console.error("no job specified");
@@ -51,14 +51,14 @@ if (!process.argv[2]) {
 	var job = JSON.parse(process.argv[2]);
 	var EventEmitter = new EventEmitter();
 	listenForEvents(knowhowShell,events);
-	knowhowShell.executeJob(job, function(err, completedJob) {
+	knowhowShell.executeJob(job, function(err, scriptRuntime) {
 		if(err) {
 			throw err;
 			process.exit(1);
 		}
 		console.log(job.id+" subprocess complete");
-		job.eventType="subprocess-complete";
-		process.send(job);
+		scriptRuntime.eventType="subprocess-complete";
+		process.send(scriptRuntime);
 		process.exit(0);
 	});
 }
