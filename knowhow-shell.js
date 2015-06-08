@@ -103,7 +103,7 @@ var executeJob = function(job, callback) {
  *
  * @param job the job to execute
  */
-var executeJobAsSubProcess = function(job) {
+var executeJobAsSubProcess = function(job, callback) {
 
 	var cp = require('child_process');
 	
@@ -118,7 +118,7 @@ var executeJobAsSubProcess = function(job) {
 	var listenForSubProcessEvents = function(subProcess, events) {
 		subProcess.on('message', function(data) {
 			var eventType = data.eventType;
-			if (eventType =='subprocess-complete' || eventType =='job-error' || eventType =='job-cancel') {
+			if (eventType =='subprocess-complete') {
 				
 				clearTimeout(job.timeout);
 				clearInterval(job.progressCheck);
@@ -126,6 +126,14 @@ var executeJobAsSubProcess = function(job) {
 				delete job.progressCheck;
 				delete job.subprocess;
 				eventEmitter.emit("job-complete", job);
+				if (callback) callback(undefined, job);
+			} else if (eventType =='job-error' || eventType =='job-cancel' ){
+				clearTimeout(job.timeout);
+				clearInterval(job.progressCheck);
+				delete job.timeout;
+				delete job.progressCheck;
+				delete job.subprocess;
+				if (callback) callback(new Error("job error: "+job.status));
 			}
 			//console.log("eventType="+data.eventType);
 			//console.log(data);

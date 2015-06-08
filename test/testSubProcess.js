@@ -54,4 +54,6 @@ knowhowShell.on('job-update', function(job) {
 	console.log(job.id +' progress = '+job.progress);
 });
 
-knowhowShell.executeJobAsSubProcess(dummyJob);
+knowhowShell.executeJobAsSubProcess(dummyJob, function(err, completedJob) {
+	console.log("executeJobAsSubProcess callback complete");
+});
