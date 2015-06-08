@@ -22,7 +22,7 @@ exports.executeJob = function(job) {
 	
 }
 
-var events = ['job-complete', 'job-error', 'job-cancel','execution-start', 'execution-error','execution-password-prmopt', 'execution-complete'];
+var events = ['job-complete', 'job-error', 'job-cancel','execution-start', 'execution-error','execution-password-prompt', 'execution-complete'];
 
 /**
  * listens for and rebroadcast 
