@@ -1,10 +1,10 @@
 var KnowhowShell = require('../knowhow-shell.js');
 var knowhowShell = new KnowhowShell();
 
-knowhowShell.executeSingleCommand("ls -lA", function(err, result) {
-	console.log(result);
+knowhowShell.executeSingleCommand("node -v ", function(err, result) {
+	console.log("you are running node version: "+result.output);
 });
-
+/*
 npmInitCommand = {
 				command: 'npm init',
 				responses: {
@@ -23,4 +23,4 @@ npmInitCommand = {
 			
 knowhowShell.executeSingleCommand(npmInitCommand, function(err, result) {
 	console.log(result);
-});
+});*/

@@ -29,8 +29,8 @@ If you just want to execute a command without learning knowhow job syntax we pro
 		var KnowhowShell = require('../knowhow-shell.js');
 		var knowhowShell = new KnowhowShell();
 		
-		knowhowShell.executeSingleCommand("ls -lA", function(err, result) {
-			console.log(result);
+		knowhowShell.executeSingleCommand("node -v", function(err, result) {
+			console.log("you are running node version: "+result.output);
 		});
 
 You may also pass in a command object for more complex tasks:
