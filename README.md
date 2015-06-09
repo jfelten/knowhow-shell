@@ -42,7 +42,14 @@ sampleJob = {<br>
 
 ##commits since last release
 
-		added term stroy method to pool object destory method
+		added callback for executeAsSubprocess
+ 		correct for execution-password-prompt
+ 		added separate script to execute in a new process
+ 		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
+ 		added execute as subprocess method because pty.js is not thread safe in the node event loop. pty.js can create a memory leak if multiple instances are used in the same ndoe process.
+ 		0.1.36
+ 		README autobuild for version:
+ 		added term stroy method to pool object destory method
  		1. Add Execution start Event 2. Clean up script output by supressing internal knowhow commands 3. Added completedCommand array for easier retrieval of command results 4. Added terminal destroy method to clean up hanging pty.js prcesses - this move move to a threading mdel shortly
  		0.1.35
  		README autobuild for version:
@@ -205,7 +212,7 @@ sampleJob = {<br>
  		correct directory structure
  		initial add
  		initial add
- 0.1.35..HEAD
+ 0.1.36..HEAD
  or '#' to appear</b><br>
 &thinsp;&thinsp;},<br>
 &thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
