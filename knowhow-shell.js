@@ -230,6 +230,46 @@ var executeJobWithPool = function(ttyPool, job, callback) {
 	});
 }
 
+/**
+ * Convenience method for executing a single command for those who don't
+ * want to complexity of creating their own jobs
+ */
+var executeSingleCommand = function(command, callback) {
+	
+	var jobSkeleton = {
+	  "id": "KH execute single command",
+	  "working_dir": "/tmp/KHAgent",
+	  "options": {
+	    "timeoutms": 40000,
+	    "noEcho": true
+	  },
+	  "files": [],
+	  "script": {
+	    "env": {
+	      "PATH": '/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'
+	    },
+	    "commands": [
+	    ]
+	  }
+	}
+
+	if (!command.command) {
+		command = { command: command};
+	}
+	jobSkeleton.script.commands.push(command);
+	executeJobAsSubProcess(jobSkeleton, function(err, jobRuntime) {
+		if(err) {
+			console.error("error execing: "+command.command+" "+err.message);
+			callback(err);	
+			
+		} else {
+			console.log(jobRuntime);
+			callback(undefined, jobRuntime.completedCommands[0].output);
+		}
+	});
+
+}
+exports.executeSingleCommand = executeSingleCommand;
 
 function KnowhowShell(passedInEmitter) {
 	if (passedInEmitter) {
@@ -241,6 +281,7 @@ KnowhowShell.prototype.cancelJob = cancelJob;
 KnowhowShell.prototype.executeJob = executeJob;
 KnowhowShell.prototype.executeJobAsSubProcess = executeJobAsSubProcess;
 KnowhowShell.prototype.executeJobWithPool = executeJobWithPool;
+KnowhowShell.prototype.executeSingleCommand = executeSingleCommand;
 KnowhowShell.eventEmitter = eventEmitter;
 KnowhowShell.jobsInProgress = jobsInProgress;
 KnowhowShell.prototype.addListener =
