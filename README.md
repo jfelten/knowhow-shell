@@ -17,6 +17,43 @@ NOTE - incompatible with node 0.11.x  ( verified working in 0.10.x and 0.12.x)  
 # Installation
 
     npm install knowhow-shell
+    
+# Installation
+
+    npm install knowhow-shell
+    
+# Simple Usage - executing a single command
+
+If you just want to execute a command without learning knowhow job syntax we provide a simple interface:
+
+		var KnowhowShell = require('../knowhow-shell.js');
+		var knowhowShell = new KnowhowShell();
+		
+		knowhowShell.executeSingleCommand("ls -lA", function(err, result) {
+			console.log(result);
+		});
+
+You may also pass in a command object for more complex tasks:
+
+		npmInitCommand = {
+				command: 'npm init',
+				responses: {
+					'name:': "knowhowiscool",
+					'version:': "0.0.0",
+					'description:': "single command example",
+					'entry point:': "",
+					'test command:': "",
+					'git repository:': "",
+					'keywords:': "knowhow",
+					'author:': "you",
+					'license:': "GPL-3.0+",
+					'Is this ok\?': "y"
+				}
+			};
+			
+		knowhowShell.executeSingleCommand(npmInitCommand, function(err, result) {
+			console.log(result);
+		});
 
 # Anatomy of a knowhow job
 
@@ -40,9 +77,13 @@ sampleJob = {<br>
 &thinsp;&thinsp;&thinsp;},<br>
 &thinsp;&thinsp;&thinsp;"waitForPrompt" : "[$#]" <b>Wait for the prompt '
 
-##commits since last release
-
-		added single command example
+###commits since last release
+		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
+ 		0.1.39
+ 		README autobuild for version:
+ 		attempt to fix README generation
+ 		added content to README.md
+ 		added single command example
  		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
  		0.1.38
  		README autobuild for version:
@@ -221,7 +262,8 @@ sampleJob = {<br>
  		correct directory structure
  		initial add
  		initial add
- 0.1.38..HEAD
+ 0.1.39..HEAD
+
  or '#' to appear</b><br>
 &thinsp;&thinsp;},<br>
 &thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
@@ -454,6 +496,5 @@ tty objects are heavy and expensive.  Most operating systems limit the number of
 Please visit the [knowhow example repository project](https://github.com/jfelten/knowhow_example_repo) to see examples of actual production jobs.
 
 
-##commits since last release
-
+###commits since last release
 #include "git_commit.md"
