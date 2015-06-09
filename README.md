@@ -42,7 +42,11 @@ sampleJob = {<br>
 
 ##commits since last release
 
-		added callback for executeAsSubprocess
+		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
+ 		0.1.37
+ 		README autobuild for version:
+ 		fix subprocess callback data.
+ 		added callback for executeAsSubprocess
  		correct for execution-password-prompt
  		added separate script to execute in a new process
  		Merge branch 'master' of https://github.com/jfelten/knowhow-shell.git
@@ -212,7 +216,7 @@ sampleJob = {<br>
  		correct directory structure
  		initial add
  		initial add
- 0.1.36..HEAD
+ 0.1.37..HEAD
  or '#' to appear</b><br>
 &thinsp;&thinsp;},<br>
 &thinsp;&thinsp;"onExit" : { <b>Add exit behavior here like logging out or closing a session</b><br>
