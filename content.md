@@ -17,6 +17,43 @@ NOTE - incompatible with node 0.11.x  ( verified working in 0.10.x and 0.12.x)  
 # Installation
 
     npm install knowhow-shell
+    
+# Installation
+
+    npm install knowhow-shell
+    
+# Simple Usage - executing a single command
+
+If you just want to execute a command without learning knowhow job syntax we provide a simple interface:
+
+		var KnowhowShell = require('../knowhow-shell.js');
+		var knowhowShell = new KnowhowShell();
+		
+		knowhowShell.executeSingleCommand("ls -lA", function(err, result) {
+			console.log(result);
+		});
+
+You may also pass in a command object for more complex tasks:
+
+		npmInitCommand = {
+				command: 'npm init',
+				responses: {
+					'name:': "knowhowiscool",
+					'version:': "0.0.0",
+					'description:': "single command example",
+					'entry point:': "",
+					'test command:': "",
+					'git repository:': "",
+					'keywords:': "knowhow",
+					'author:': "you",
+					'license:': "GPL-3.0+",
+					'Is this ok\?': "y"
+				}
+			};
+			
+		knowhowShell.executeSingleCommand(npmInitCommand, function(err, result) {
+			console.log(result);
+		});
 
 # Anatomy of a knowhow job
 
