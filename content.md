@@ -26,7 +26,7 @@ NOTE - incompatible with node 0.11.x  ( verified working in 0.10.x and 0.12.x)  
 
 If you just want to execute a command without learning knowhow job syntax we provide a simple interface:
 
-		var KnowhowShell = require('../knowhow-shell.js');
+		var KnowhowShell = require('knowhow-shell.js');
 		var knowhowShell = new KnowhowShell();
 		
 		knowhowShell.executeSingleCommand("node -v", function(err, result) {
