@@ -22,18 +22,18 @@ NOTE - incompatible with node 0.11.x  ( verified working in 0.10.x and 0.12.x)  
 
     npm install knowhow-shell
     
-# Simple Usage - executing a single command
+## Simple Usage - executing a single command
 
-If you just want to execute a command without learning knowhow job syntax we provide a simple interface:
+If you just want to execute a command without learning knowhow job there is a simple interface:
 
-		var KnowhowShell = require('../knowhow-shell.js');
+		var KnowhowShell = require('knowhow-shell.js');
 		var knowhowShell = new KnowhowShell();
 		
 		knowhowShell.executeSingleCommand("node -v", function(err, result) {
 			console.log("you are running node version: "+result.output);
 		});
 
-You may also pass in a command object for more complex tasks:
+For more complex tasks use a command object:
 
 		npmInitCommand = {
 				command: 'npm init',
@@ -154,7 +154,7 @@ Define a job and use the execute job method.  The following events are exposed: 
 
 ## another example
 
-This is another example take from: [node-suppose](https://github.com/jprichardson/node-suppose), which did not work for our purposes due to the lack of a tty.
+Here is a more comprehensive job version of the simple npm init example given above:
 
     npmInitJob = { 
         "id": "npm init job",
@@ -291,9 +291,16 @@ We have no control over what the host system will do, and sometimes we need to s
 
 ## [More advanced examples](https://github.com/jfelten/knowhow_example_repo)
 
+## executing as a subprocess vs in the node event loop
+
+		knowhowShell.executeJob will execute within the main nodejs event loop
+		knowhowShell.knowhowShellAsSubProcess will spawn a child process and execte the job there
+		
+Executing as a child process is preferred because pty.js is not thread safe within the node event loop.  This means that if you try to invoke 2 shells problems will occur because of shared state between each pty.js object.  Specifically pty.js objects do not close properly and cause memory leaks.  Executing knowhow jobs in a subprocess eliminates this problem.  The subprocess communicates events back to the main loop so there is no loss of functionality.
+
 ## tty pooling
 
-tty objects are heavy and expensive.  Most operating systems limit the number of ttys used simultaneously for good reason.  We also found that pty.js becomes unstable after openiung 50 tty objects.  For this reason we have introduced a tty-pool based on [generic=pool](https://github.com/coopernurse/node-pool).  Jobs work the same way except we use the executeJobWithPool.  The foctory method for TTYPool takes 2 arguments (min, max);
+tty objects are heavy and expensive.  Most operating systems limit the number of ttys used simultaneously for good reason.  We also found that pty.js becomes unstable after openiung 50 tty objects.  For this reason we have introduced a tty-pool based on [node-pool](https://github.com/coopernurse/node-pool).  Jobs work the same way except we use the executeJobWithPool.  The foctory method for TTYPool takes 2 arguments (min, max);
 
 		var KnowhowShell = require('../knowhow-shell.js');
 		var knowhowShell = new KnowhowShell();
