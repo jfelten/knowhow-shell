@@ -154,7 +154,7 @@ Define a job and use the execute job method.  The following events are exposed: 
 
 ## another example
 
-This is another example take from: [node-suppose](https://github.com/jprichardson/node-suppose), which did not work for our purposes due to the lack of a tty.
+Here is a more comprehensive job version of the simple npm init example given above:
 
     npmInitJob = { 
         "id": "npm init job",
