@@ -300,7 +300,7 @@ Executing as a child process is preferred because pty.js is not thread safe with
 
 ## tty pooling
 
-tty objects are heavy and expensive.  Most operating systems limit the number of ttys used simultaneously for good reason.  We also found that pty.js becomes unstable after openiung 50 tty objects.  For this reason we have introduced a tty-pool based on [generic=pool](https://github.com/coopernurse/node-pool).  Jobs work the same way except we use the executeJobWithPool.  The foctory method for TTYPool takes 2 arguments (min, max);
+tty objects are heavy and expensive.  Most operating systems limit the number of ttys used simultaneously for good reason.  We also found that pty.js becomes unstable after openiung 50 tty objects.  For this reason we have introduced a tty-pool based on [node-pool](https://github.com/coopernurse/node-pool).  Jobs work the same way except we use the executeJobWithPool.  The foctory method for TTYPool takes 2 arguments (min, max);
 
 		var KnowhowShell = require('../knowhow-shell.js');
 		var knowhowShell = new KnowhowShell();
