@@ -22,9 +22,9 @@ NOTE - incompatible with node 0.11.x  ( verified working in 0.10.x and 0.12.x)  
 
     npm install knowhow-shell
     
-# Simple Usage - executing a single command
+## Simple Usage - executing a single command
 
-If you just want to execute a command without learning knowhow job syntax we provide a simple interface:
+If you just want to execute a command without learning knowhow job there is a simple interface:
 
 		var KnowhowShell = require('knowhow-shell.js');
 		var knowhowShell = new KnowhowShell();
