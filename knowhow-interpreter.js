@@ -455,7 +455,7 @@ var setEnv = function(job, callback) {
 		  	 if (scriptRuntime.currentCommand) {
 		  	 	scriptRuntime.currentCommand.output+=data;
 		  	 }
-		  	  if (job.options.promptForPassword && data.match(passwordRE)) {
+		  	  if (job.options && job.options.promptForPassword && data.match(passwordRE)) {
 		  	  	eventEmitter.emit('execution-password-promp', scriptRuntime.currentCommand);
 		  	  }
 		  	  //console.log("responses="+scriptRuntime.currentCommand.responses);
@@ -466,7 +466,9 @@ var setEnv = function(job, callback) {
 			  		if (data.match(responseKey)) {
 			  			//console.log("match response: "+responseKey+" "+response);
 			  			term.write(response+"\r");
-			  			delete scriptRuntime.currentCommand.responses[responseKey];
+			  			//if (!responseKey.match(passwordRE)) {
+			  				delete scriptRuntime.currentCommand.responses[responseKey];
+			  			//}
 			  		}
 			  	});
 			  	//for (response in scriptRuntime.currentCommand.responses) {
