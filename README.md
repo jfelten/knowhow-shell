@@ -294,7 +294,7 @@ We have no control over what the host system will do, and sometimes we need to s
 ## executing as a subprocess vs in the node event loop
 
 		knowhowShell.executeJob will execute within the main nodejs event loop
-		knowhowShell.knowhowShellAsSubProcess will spawn a child process and execte the job there
+		knowhowShell.executeJobAsSubProcess will spawn a child process and execte the job there
 		
 Executing as a child process is preferred because pty.js is not thread safe within the node event loop.  This means that if you try to invoke 2 shells problems will occur because of shared state between each pty.js object.  Specifically pty.js objects do not close properly and cause memory leaks.  Executing knowhow jobs in a subprocess eliminates this problem.  The subprocess communicates events back to the main loop so there is no loss of functionality.
 
