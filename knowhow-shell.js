@@ -88,7 +88,8 @@ var executeJob = function(job, callback) {
 		delete job.timeout;
 		delete job.progressCheck;
 		delete job.subprocess;
-		eventEmitter.emit("job-complete", scriptRuntime);
+		job.scriptRuntime = scriptRuntime;
+		eventEmitter.emit("job-complete", job);
 		delete jobsInProgress[jobId];
 		callback(err, scriptRuntime);
 
@@ -106,7 +107,8 @@ var executeJob = function(job, callback) {
 var executeJobAsSubProcess = function(job, callback) {
 
 	var cp = require('child_process');
-	
+	delete job.scriptRuntime;
+	console.log(job);
 	var subprocess = cp.fork(__dirname+'/execJob.js',[JSON.stringify(job)]);
 	var events = ['job-complete', 'job-error', 'job-cancel', 
 	'execution-start', 'execution-error','execution-password-prmopt', 'execution-complete'];
@@ -125,7 +127,7 @@ var executeJobAsSubProcess = function(job, callback) {
 				delete job.timeout;
 				delete job.progressCheck;
 				delete job.subprocess;
-				eventEmitter.emit("job-complete", data);
+				//eventEmitter.emit("job-complete", data);
 				if (callback) callback(undefined, data);
 			} else if (eventType =='job-error' || eventType =='job-cancel' ){
 				clearTimeout(job.timeout);
@@ -222,7 +224,8 @@ var executeJobWithPool = function(ttyPool, job, callback) {
 			delete job.timeout;
 			delete job.progressCheck;
 			delete job.subprocess;
-			eventEmitter.emit("job-complete", scriptRuntime);
+			job.scriptRuntime = scriptRuntime;
+			eventEmitter.emit("job-complete", job);
 			term.removeAllListeners();
 			ttyPool.release(term);
 			delete jobsInProgress[job.id];

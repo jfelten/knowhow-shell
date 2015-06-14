@@ -88,16 +88,20 @@ knowhowShell.on('job-update', function(job) {
 	console.log(job.id +' progress = '+job.progress);
 });
 
-
-knowhowShell.executeJob(npmInitJob, function(err) {
-	console.log("done...........");
+var npmInitJob2 = npmInitJob
+knowhowShell.executeJobAsSubProcess(npmInitJob2, function(err) {
 	if (err) {
 		console.log(err.message);
 		console.log(err.stack);
 		throw err;
 	}
+	console.log("executeJobAsSubprocess success!!");
 	
 });
+
+
+
+
 
 
 

@@ -58,7 +58,8 @@ if (!process.argv[2]) {
 		}
 		console.log(job.id+" subprocess complete");
 		scriptRuntime.eventType="subprocess-complete";
-		process.send(scriptRuntime);
+		job.scriptRuntime = scriptRuntime;
+		process.send(job);
 		process.exit(0);
 	});
 }
