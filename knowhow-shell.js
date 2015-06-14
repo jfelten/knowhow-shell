@@ -54,7 +54,7 @@ var executeJob = function(job, callback) {
 	if (job.options && job.options.timeoutms) {
 		timeoutms = job.options.timeoutms;
 	}
-	var timeout = setTimeout(function() {
+	job.timeout = setTimeout(function() {
 		//if (progressCheck) {
 		//	clearInterval(progressCheck);
 		//}
@@ -68,13 +68,11 @@ var executeJob = function(job, callback) {
 			callback(new Error("timed out: "+job.id), undefined);
 		}
 	},timeoutms);
-	job.timeout=timeout;
-	progressCheck = setInterval(function() {
+	job.progressCheck = setInterval(function() {
 		    job.progress++;
 		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
 			
 		},5000);
-	job.progressCheck = progressCheck;
 	jobsInProgress[jobId] = job;
 	
 	knowhowInterpreter.executeJobOnTerm(term, job, eventEmitter, function(err, scriptRuntime) {
@@ -83,8 +81,8 @@ var executeJob = function(job, callback) {
 		term.end();
 		term.destroy();
 		term._close();
-		clearTimeout(timeout);
-		clearInterval(progressCheck);
+		clearTimeout(job.timeout);
+		clearInterval(job.progressCheck);
 		delete job.timeout;
 		delete job.progressCheck;
 		delete job.subprocess;
@@ -120,13 +118,17 @@ var executeJobAsSubProcess = function(job, callback) {
 	var listenForSubProcessEvents = function(subProcess, events) {
 		subProcess.on('message', function(data) {
 			var eventType = data.eventType;
+			console.log("eventType="+eventType);
 			if (eventType =='subprocess-complete') {
 				
 				clearTimeout(job.timeout);
 				clearInterval(job.progressCheck);
+				if (job.subProcess) {
+					job.subProcess.kill('SIGTERM');
+				}
 				delete job.timeout;
 				delete job.progressCheck;
-				delete job.subprocess;
+				delete job.subProcess;
 				//eventEmitter.emit("job-complete", data);
 				if (callback) callback(undefined, data);
 			} else if (eventType =='job-error' || eventType =='job-cancel' ){
@@ -150,13 +152,13 @@ var executeJobAsSubProcess = function(job, callback) {
 	if (job.options && job.options.timeoutms) {
 		timeoutms = job.options.timeoutms;
 	}
-	var timeout = setTimeout(function() {
+	job.timeout = setTimeout(function() {
 		//if (progressCheck) {
 		//	clearInterval(progressCheck);
 		//}
 		job.status='Timed out';
 		eventEmitter.emit('job-error',job);
-		term.destroy();
+		
 		if (job.progressCheck) {
 			clearInterval(job.progressCheck);
 		}
@@ -164,13 +166,11 @@ var executeJobAsSubProcess = function(job, callback) {
 			callback(new Error("timed out: "+job.id), undefined);
 		}
 	},timeoutms);
-	job.timeout=timeout;
-	progressCheck = setInterval(function() {
+	job.progressCheck = setInterval(function() {
 		    job.progress++;
 		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
 			
 		},5000);
-	job.progressCheck = progressCheck;
 	job.subProcess = subprocess;
 	jobsInProgress[job.id] = job;
 	

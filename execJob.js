@@ -54,10 +54,12 @@ if (!process.argv[2]) {
 	knowhowShell.executeJob(job, function(err, scriptRuntime) {
 		if(err) {
 			throw err;
+			job.eventType="job-error";
+			process.send(job);
 			process.exit(1);
 		}
 		console.log(job.id+" subprocess complete");
-		scriptRuntime.eventType="subprocess-complete";
+		job.eventType="subprocess-complete";
 		job.scriptRuntime = scriptRuntime;
 		process.send(job);
 		process.exit(0);
