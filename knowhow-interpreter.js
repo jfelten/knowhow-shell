@@ -594,8 +594,9 @@ var setEnv = function(job, callback) {
 		    	if (err) {
 					console.log("ERROR!!!!"+err.message);
 					job.progress=0;
-					//job.status=err.message;
-					eventEmitter.emit('job-error',job);
+					job.status=err.message;
+					//console.log(job);
+					eventEmitter.emit('job-error',{ "id": job.id, "status": job.status});
 					//clearInterval(progressCheck);
 					//clearTimeout(timeout);
 					term.removeAllListeners();

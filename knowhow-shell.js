@@ -137,7 +137,7 @@ var executeJobAsSubProcess = function(job, callback) {
 				delete job.timeout;
 				delete job.progressCheck;
 				delete job.subprocess;
-				if (callback) callback(new Error("job error: "+job.status));
+				if (callback) callback(new Error("job error: "+eventType));
 			}
 			if (eventType =='execution error') {
 				job.status="ERROR";
