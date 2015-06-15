@@ -131,13 +131,17 @@ var executeJobAsSubProcess = function(job, callback) {
 				delete job.subProcess;
 				//eventEmitter.emit("job-complete", data);
 				if (callback) callback(undefined, data);
-			} else if (eventType =='job-error' || eventType =='job-cancel' ){
+			} else if (eventType =='execution error' || eventType =='job-error' || eventType =='job-cancel' ){
 				clearTimeout(job.timeout);
 				clearInterval(job.progressCheck);
 				delete job.timeout;
 				delete job.progressCheck;
 				delete job.subprocess;
 				if (callback) callback(new Error("job error: "+job.status));
+			}
+			if (eventType =='execution error') {
+				job.status="ERROR";
+				eventEmitter.emit('job-error', job);
 			}
 			//console.log("eventType="+data.eventType);
 			//console.log(data);
