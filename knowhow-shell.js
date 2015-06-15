@@ -87,7 +87,9 @@ var executeJob = function(job, callback) {
 		delete job.progressCheck;
 		delete job.subprocess;
 		job.scriptRuntime = scriptRuntime;
-		eventEmitter.emit("job-complete", job);
+		if (!err) {
+			eventEmitter.emit("job-complete", job);
+		}
 		delete jobsInProgress[jobId];
 		callback(err, scriptRuntime);
 
@@ -216,11 +218,14 @@ var executeJobWithPool = function(ttyPool, job, callback) {
 		console.log("term="+term);
 		jobsInProgress[job.id] = job;
 		knowhowInterpreter.executeJobOnTerm(term, job, eventEmitter, function(err, scriptRuntime) {
+			
+			job.scriptRuntime = scriptRuntime;
 			if (err) {
 				cancelJob(job);
 				callback(err, scriptRuntime);
-			}	else {	
-				
+				//eventEmitter.emit("job-error", job);
+				return;
+			}else {	
 				callback(undefined, scriptRuntime);
 			}
 			clearTimeout(timeout);
@@ -228,7 +233,6 @@ var executeJobWithPool = function(ttyPool, job, callback) {
 			delete job.timeout;
 			delete job.progressCheck;
 			delete job.subprocess;
-			job.scriptRuntime = scriptRuntime;
 			eventEmitter.emit("job-complete", job);
 			term.removeAllListeners();
 			ttyPool.release(term);
