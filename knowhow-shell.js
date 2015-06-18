@@ -68,9 +68,9 @@ var executeJob = function(job, callback) {
 			callback(new Error("timed out: "+job.id), undefined);
 		}
 	},timeoutms);
+	job.progress=1;
 	job.progressCheck = setInterval(function() {
-		    job.progress++;
-		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
+		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress++});
 			
 		},5000);
 	jobsInProgress[jobId] = job;
@@ -172,9 +172,9 @@ var executeJobAsSubProcess = function(job, callback) {
 			callback(new Error("timed out: "+job.id), undefined);
 		}
 	},timeoutms);
+	job.progress = 1;
 	job.progressCheck = setInterval(function() {
-		    job.progress++;
-		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
+		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress++});
 			
 		},5000);
 	job.subProcess = subprocess;
