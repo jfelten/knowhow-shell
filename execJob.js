@@ -34,7 +34,10 @@ var listenForEvents = function(knowhowShell,events) {
 		knowhowShell.on(event, function(data) {
 			//console.log("EVENT: "+this.event);
 			data.eventType = this.event;
+			delete data.timeout;
+			delete data.progressCheck;
 			//console.log(data);
+			
 			process.send(data);
 		}.bind({event:event}));
 	}
