@@ -25,6 +25,9 @@ npmInitJob = {
     	},
 		commands: [
 			{
+				"command": "sleep 15"
+			},
+			{
 		    	"command": "echo ${PROJECT_DIR}"
 		    },
 			{
@@ -88,12 +91,16 @@ knowhowShell.on('job-update', function(job) {
 	console.log(job.id +' progress = '+job.progress);
 });
 
+knowhowShell.on('execution-erro', function(scriptRuntime) {
+	console.log("execution-error: "+scriptRuntime);
+});
+
 var npmInitJob2 = npmInitJob
 knowhowShell.executeJobAsSubProcess(npmInitJob2, function(err) {
 	if (err) {
 		console.log(err.message);
 		console.log(err.stack);
-		throw err;
+		//throw err;
 	}
 	console.log("executeJobAsSubprocess success!!");
 	
