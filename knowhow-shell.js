@@ -274,8 +274,7 @@ var executeSingleCommand = function(command, callback) {
 			callback(err);	
 			
 		} else {
-			console.log(jobRuntime);
-			callback(undefined, jobRuntime.completedCommands[0]);
+			callback(undefined, jobRuntime.scriptRuntime.completedCommands[0]);
 		}
 	});
 
