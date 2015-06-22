@@ -153,7 +153,7 @@ var executeJobAsSubProcess = function(job, callback) {
 	};
 	listenForSubProcessEvents(subprocess,events);
 	
-
+/*
 	var timeoutms = 120000;
 	if (job.options && job.options.timeoutms) {
 		timeoutms = job.options.timeoutms;
@@ -176,7 +176,7 @@ var executeJobAsSubProcess = function(job, callback) {
 	job.progressCheck = setInterval(function() {
 		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress++});
 			
-		},5000);
+		},5000);*/
 	job.subProcess = subprocess;
 	jobsInProgress[job.id] = job;
 	

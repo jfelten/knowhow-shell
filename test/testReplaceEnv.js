@@ -10,6 +10,7 @@ var testJob = {
   "files": [],
   "script": {
     "env": {
+      "MY_DIR": "${working_dir}/test",
       "KH_SERVER": "http://master102:3001",
       "AGENT": "{\\\"user\\\": \\\"${agent_user}\\\", \\\"password\\\": \\\"${agent_password}\\\", \\\"host\\\": \\\"${agent_host}\\\", \\\"port\\\":${agent_port}}"
     },
@@ -17,6 +18,9 @@ var testJob = {
 
       {
         "command": "echo \"KHCommand resetAgent ${KH_SERVER} \"${AGENT}\"\""
+      },
+      {
+      	"command": "echo ${MY_DIR}"
       }
     ]
   },
@@ -37,6 +41,6 @@ knowhowShell.executeJobAsSubProcess(testJob, function(err, job) {
 	}
 	console.log("job success!!");
 	console.log(job.scriptRuntime.completedCommands[0]);
-	
+	console.log(job.scriptRuntime.completedCommands[1]);
 });
 

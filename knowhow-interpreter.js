@@ -61,6 +61,7 @@ var setEnv = function(job, callback) {
 		   	//console.log("executing: "+regEx+" on "+replacedString+" "+envHash);
 			var res = replacedString.match(regEx);
 			var recurse = undefined;
+			var ignoreVals = [];
 			//console.log("res="+res);
 			if (res && res != null) {
 				 for (i=0; i < res.length; i++) {
@@ -70,14 +71,17 @@ var setEnv = function(job, callback) {
 				        var varName = replaceVal.replace('{','').replace('}','').replace('$','');
 				        var value = envHash[varName];
 				    	if (!value) {
-				    		value = '';
+				    		ignoreVals.push(varName);
+				    		//value = replaceVal;
 				    		console.error("invalid variable: "+varName);
-				    		//rvCB(new Error("invalid variable: "+varName),searchString);
+				    		//console.log(envHash);
+				    		//rvCB(undefined,searchString);
 				    		//return searchString;
+				    	} else {
+				    		//console.log("replaceVal="+replaceVal+" value="+value);
+				    		replacedString=replacedString.replace(replaceVal,value);
+				    		//console.log("replacedString="+replacedString+" "+replaceVal);
 				    	}
-				    	//console.log("replaceVal="+replaceVal+" value="+value);
-				    	replacedString=replacedString.replace(replaceVal,value);
-				    	//console.log("replacedString="+replacedString+" "+replaceVal);
 				    }
 			      }
 			      var otherMatches = replacedString.match(regEx);
@@ -86,13 +90,17 @@ var setEnv = function(job, callback) {
 			      	  recurse = true;
 				      async.each(otherMatches, function(match, omcb) {
 				      	var envVariable = match.replace('\${','').replace('}','');
-				 		//console.log("replacing value: "+envVariable);
-				 		//console.log("replacing other match: "+replacedString+" "+envVariable);
-				 		
-				      	replaceVar(regEx, replacedString, envHash,function (err, newString) {
-				      		replacedString = newString;
-				      		omcb();
-				      	});
+				      	if (ignoreVals.indexOf(envVariable) < 0) {
+					 		//console.log("replacing value: "+envVariable);
+					 		//console.log("replacing other match: "+replacedString+" "+envVariable);
+					 		
+					      	replaceVar(regEx, replacedString, envHash,function (err, newString) {
+					      		replacedString = newString;
+					      		omcb();
+					      	});
+					    } else {
+					    	omcb();
+					    }
 
 				      }, function(err) {
 				      	if(err) {
