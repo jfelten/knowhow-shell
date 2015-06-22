@@ -27,7 +27,7 @@ sshJob = {
   "env": {
   	"agent_user": "johnfelten",
   	"HOST": "localhost",
-  	agent_password: "@rtt3chn0l0gy"
+  	agent_password: ""
   },
   "files": [],
   "script": {

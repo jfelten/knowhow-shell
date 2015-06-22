@@ -91,7 +91,7 @@ knowhowShell.on('job-update', function(job) {
 	console.log(job.id +' progress = '+job.progress);
 });
 
-knowhowShell.on('execution-erro', function(scriptRuntime) {
+knowhowShell.on('execution-error', function(scriptRuntime) {
 	console.log("execution-error: "+scriptRuntime);
 });
 
