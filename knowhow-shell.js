@@ -144,13 +144,11 @@ var executeJobAsSubProcess = function(job, callback) {
 			if (eventType =='execution error') {
 				job.status="ERROR";
 				eventEmitter.emit('job-error', job);
-			} else {
-				eventEmitter.emit(eventType, data);
 			}
 			//console.log("eventType="+data.eventType);
 			//console.log(data);
 			//delete data.eventType;
-			
+			eventEmitter.emit(eventType, data);
 		});
 	};
 	listenForSubProcessEvents(subprocess,events);
