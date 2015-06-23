@@ -110,7 +110,7 @@ var executeJobAsSubProcess = function(job, callback) {
 	delete job.scriptRuntime;
 	console.log(job);
 	var subprocess = cp.fork(__dirname+'/execJob.js',[JSON.stringify(job)]);
-	var events = ['job-complete', 'job-error', 'job-cancel', 
+	var events = ['job-complete', 'job-error', 'job-cancel', 'job-update', 
 	'execution-start', 'execution-error','execution-password-prmopt', 'execution-complete'];
 
 	
