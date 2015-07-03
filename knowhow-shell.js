@@ -83,8 +83,8 @@ var executeJob = function(job, callback) {
 		term._close();
 		clearTimeout(job.timeout);
 		clearInterval(job.progressCheck);
-		delete job.timeout;
-		delete job.progressCheck;
+		//delete job.timeout;
+		//delete job.progressCheck;
 		delete job.subprocess;
 		job.scriptRuntime = scriptRuntime;
 		if (!err) {
@@ -109,6 +109,7 @@ var executeJobAsSubProcess = function(job, callback) {
 	var cp = require('child_process');
 	delete job.scriptRuntime;
 	console.log(job);
+	job.callback = callback;
 	var subprocess = cp.fork(__dirname+'/execJob.js',[JSON.stringify(job)]);
 	var events = ['job-complete', 'job-error', 'job-cancel', 'job-update', 
 	'execution-start', 'execution-error','execution-password-prmopt', 'execution-complete'];
@@ -123,23 +124,30 @@ var executeJobAsSubProcess = function(job, callback) {
 			console.log("eventType="+eventType);
 			if (eventType =='subprocess-complete') {
 				
-				clearTimeout(job.timeout);
-				clearInterval(job.progressCheck);
+				if (job.timeout) {
+					clearTimeout(job.timeout);
+				}
+				if (job.progressCheck) {
+					clearInterval(job.progressCheck);
+				}
 				if (job.subProcess) {
 					job.subProcess.kill('SIGTERM');
 				}
-				delete job.timeout;
-				delete job.progressCheck;
+				//delete job.timeout;
+				//delete job.progressCheck;
 				delete job.subProcess;
 				//eventEmitter.emit("job-complete", data);
 				if (callback) callback(undefined, data);
 			} else if (eventType =='execution-error' || eventType =='job-error' || eventType =='job-cancel' ){
-				clearTimeout(job.timeout);
-				clearInterval(job.progressCheck);
-				delete job.timeout;
-				delete job.progressCheck;
+				//clearTimeout(job.timeout);
+				//clearInterval(job.progressCheck);
+				//delete job.timeout;
+				//delete job.progressCheck;
 				delete job.subprocess;
-				if (callback) callback(new Error("job error: "+eventType));
+				if (job.callback)  {
+					delete job.callback;
+					callback(new Error("job error: "+eventType), data);
+				}
 			}
 			if (eventType =='execution error') {
 				job.status="ERROR";
