@@ -37,8 +37,13 @@ var listenForEvents = function(knowhowShell,events) {
 			delete data.timeout;
 			delete data.progressCheck;
 			//console.log(data);
-			
-			process.send(data);
+			try {
+				if (process) {
+					process.send(data);
+				}
+			} catch(err) {
+				process.exit(1);
+			}
 		}.bind({event:event}));
 	}
 }

@@ -64,9 +64,9 @@ var executeJob = function(job, callback) {
 		if (job.progressCheck) {
 			clearInterval(job.progressCheck);
 		}
-		if (callback) {
-			callback(new Error("timed out: "+job.id), undefined);
-		}
+		//if (callback) {
+		//	callback(new Error("timed out: "+job.id), undefined);
+		//}
 	},timeoutms);
 	job.progress=1;
 	job.progressCheck = setInterval(function() {
@@ -137,10 +137,20 @@ var executeJobAsSubProcess = function(job, callback) {
 				//delete job.progressCheck;
 				delete job.subProcess;
 				//eventEmitter.emit("job-complete", data);
-				if (callback) callback(undefined, data);
+				if (job.callback) {
+					delete job.callback;
+					callback(undefined, data);
+				}
 			} else if (eventType =='execution-error' || eventType =='job-error' || eventType =='job-cancel' ){
-				//clearTimeout(job.timeout);
-				//clearInterval(job.progressCheck);
+				if (job.timeout) {
+					clearTimeout(job.timeout);
+				}
+				if (job.progressCheck) {
+					clearInterval(job.progressCheck);
+				}
+				if (job.subProcess) {
+					job.subProcess.kill('SIGTERM');
+				}
 				//delete job.timeout;
 				//delete job.progressCheck;
 				delete job.subprocess;
