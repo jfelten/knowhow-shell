@@ -22,7 +22,7 @@ exports.executeJob = function(job) {
 	
 }
 
-var events = ['job-complete', 'job-error', 'job-cancel','job-update','execution-start', 'execution-error','execution-password-prompt', 'execution-complete'];
+var events = ['job-complete', 'job-error', 'job-cancel','job-update','execution-start', 'execution-error','execution-password-prompt', 'execution-complete', 'execution-output'];
 
 /**
  * listens for and rebroadcast 
@@ -61,7 +61,6 @@ if (!process.argv[2]) {
 	listenForEvents(knowhowShell,events);
 	knowhowShell.executeJob(job, function(err, scriptRuntime) {
 		if(err) {
-			throw err;
 			job.eventType="job-error";
 			process.send(job);
 			process.exit(1);

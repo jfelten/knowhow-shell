@@ -55,18 +55,19 @@ var executeJob = function(job, callback) {
 		timeoutms = job.options.timeoutms;
 	}
 	job.timeout = setTimeout(function() {
-		//if (progressCheck) {
-		//	clearInterval(progressCheck);
-		//}
+		if (job.progressCheck) {
+			clearInterval(job.progressCheck);
+		}
 		job.status='Timed out';
-		eventEmitter.emit('job-error',job);
+		
 		term.destroy();
 		if (job.progressCheck) {
 			clearInterval(job.progressCheck);
 		}
-		//if (callback) {
-		//	callback(new Error("timed out: "+job.id), undefined);
-		//}
+		if (callback) {
+			callback(new Error("timed out: "+job.id), undefined);
+		}
+		eventEmitter.emit('job-error',job);
 	},timeoutms);
 	job.progress=1;
 	job.progressCheck = setInterval(function() {
@@ -111,8 +112,15 @@ var executeJobAsSubProcess = function(job, callback) {
 	console.log(job);
 	job.callback = callback;
 	var subprocess = cp.fork(__dirname+'/execJob.js',[JSON.stringify(job)]);
+	subprocess.on('exit', function(code, signal) {
+		
+		if (code && code >0) {
+			job.message="job process terminated with error";
+			eventEmitter.emit('job-error', job);
+		}
+	}); 
 	var events = ['job-complete', 'job-error', 'job-cancel', 'job-update', 
-	'execution-start', 'execution-error','execution-password-prmopt', 'execution-complete'];
+	'execution-start', 'execution-error','execution-password-prmopt', 'execution-complete', 'execution-output'];
 
 	
 	/**
@@ -122,6 +130,7 @@ var executeJobAsSubProcess = function(job, callback) {
 		subProcess.on('message', function(data) {
 			var eventType = data.eventType;
 			console.log("eventType="+eventType);
+			console.log(data);
 			if (eventType =='subprocess-complete') {
 				
 				if (job.timeout) {
@@ -156,7 +165,15 @@ var executeJobAsSubProcess = function(job, callback) {
 				delete job.subprocess;
 				if (job.callback)  {
 					delete job.callback;
-					callback(new Error("job error: "+eventType), data);
+					if (data.output) {
+					  callback(new Error("job error: "+data.output), data);
+					 }
+					 else if (data.status) {
+					 	callback(new Error("job error: "+data.status), data);
+					 }
+					 else {
+					 	callback(new Error(job.id+" "+eventType), data);
+					 }
 				}
 			}
 			if (eventType =='execution error') {

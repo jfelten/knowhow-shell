@@ -25,9 +25,6 @@ npmInitJob = {
     	},
 		commands: [
 			{
-				"command": "sleep 15"
-			},
-			{
 		    	"command": "echo ${PROJECT_DIR}"
 		    },
 			{
@@ -55,7 +52,7 @@ npmInitJob = {
 					'keywords:': "${KEYWORDS}",
 					'author:': "${AUTHOR}",
 					'license:': "${LICENSE}",
-					'Is this ok\?': '\n'
+					'Is this ok': 'y'
 				}
 			}
 		] 
@@ -95,6 +92,10 @@ knowhowShell.on('execution-error', function(scriptRuntime) {
 	console.log("execution-error: "+scriptRuntime);
 });
 
+knowhowShell.on('execution-output', function(output) {
+	console.log(output.output);
+});
+
 var npmInitJob2 = npmInitJob
 knowhowShell.executeJobAsSubProcess(npmInitJob2, function(err) {
 	if (err) {
@@ -102,7 +103,7 @@ knowhowShell.executeJobAsSubProcess(npmInitJob2, function(err) {
 		console.log(err.stack);
 		//throw err;
 	}
-	console.log("executeJobAsSubprocess success!!");
+	console.log("executeJobAsSubprocess test complete.");
 	
 });
 

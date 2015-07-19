@@ -38,15 +38,3 @@ knowhowShell.executeJob(dummyJob, function(err) {
 	
 });
 
-var ttyPool = new require('../tty-pool')(2,10);
-knowhowShell.executeJobWithPool(ttyPool, dummyJob, function(err,runtimeOutput) {
-	console.log("done...........");
-	if (err) {
-		console.log(err.message);
-		console.log(err.stack);
-		throw err;
-	}
-	//console.assertTrue((err),err.message);
-	process.exit(0);
-});
-

@@ -462,11 +462,22 @@ var setEnv = function(job, callback) {
 			 	scriptRuntime.firstTimeOutput=true;
 			 }
 		  	 scriptRuntime.output+=data;
+		  	 
 		  	 if (scriptRuntime.currentCommand) {
 		  	 	scriptRuntime.currentCommand.output+=data;
+		  	 	if (!scriptRuntime.currentCommand.internal) {
+			  	 	try {
+			            var commandOutput = data.replace(promptRE,'').replace(retCodeRE,'').replace(scriptRuntime.currentCommand.command,'')
+				  	 	if (commandOutput.length >0) {
+				  	 		eventEmitter.emit('execution-output', { output: commandOutput});
+				  	 	}
+				  	 } catch (error) {
+				  	 	console.error(error);
+				  	 }
+				 }
 		  	 }
 		  	  if (job.options && job.options.promptForPassword && data.match(passwordRE)) {
-		  	  	eventEmitter.emit('execution-password-promp', scriptRuntime.currentCommand);
+		  	  	eventEmitter.emit('execution-password-prompt', scriptRuntime.currentCommand);
 		  	  }
 		  	  //console.log("responses="+scriptRuntime.currentCommand.responses);
 			  if (scriptRuntime.currentCommand && scriptRuntime.currentCommand.responses) {
