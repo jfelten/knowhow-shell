@@ -89,7 +89,7 @@ var setEnv = function(job, callback) {
 			      if (otherMatches && otherMatches !=null) {
 			      	  recurse = true;
 				      async.each(otherMatches, function(match, omcb) {
-				      	var envVariable = match.replace('\${','').replace('}','');
+				      	var envVariable = match.replace('\${','').replace('}','').replace('\$','');
 				      	if (ignoreVals.indexOf(envVariable) < 0) {
 					 		//console.log("replacing value: "+envVariable);
 					 		//console.log("replacing other match: "+replacedString+" "+envVariable);
@@ -449,7 +449,8 @@ var setEnv = function(job, callback) {
 			completedCommands: []
 		};
 				
-		var currentCommand;	
+		var currentCommand;
+		var currentLine='';
 		term.on('data', function(data) {
 			
 			if (data) {
@@ -467,9 +468,14 @@ var setEnv = function(job, callback) {
 		  	 	scriptRuntime.currentCommand.output+=data;
 		  	 	if (!scriptRuntime.currentCommand.internal) {
 			  	 	try {
-			            var commandOutput = data.replace(promptRE,'').replace(retCodeRE,'').replace(scriptRuntime.currentCommand.command,'')
-				  	 	if (commandOutput.length >0) {
-				  	 		eventEmitter.emit('execution-output', { output: commandOutput});
+			            currentLine = currentLine+data.replace('\r','').replace('\n','').replace(promptRE,'').replace(retCodeRE,'');
+				  	 	if (currentLine.length > 0 
+				  	 		&& ( currentLine.match(scriptRuntime.currentCommand.regEx) || scriptRuntime.currentCommand.isOutput) 
+				  	 		) {
+				  	 		scriptRuntime.currentCommand.isOutput=true;
+				  	 		currentLine=currentLine.replace(scriptRuntime.currentCommand.command,'');
+				  	 		eventEmitter.emit('execution-output', { output: currentLine});
+				  	 		currentLine = '';
 				  	 	}
 				  	 } catch (error) {
 				  	 	console.error(error);
@@ -510,6 +516,7 @@ var setEnv = function(job, callback) {
 			  	//scriptRuntime.currentCommand.callback();
 			  }
 			  if (scriptRuntime.currentCommand && scriptRuntime.currentCommand.output.match(retCodeRE)) {
+			    currentLine='';
 			  	job.progress=scriptRuntime.currentStep*scriptRuntime.progressStepLength;
 			  	job.status = 'completed: '+scriptRuntime.currentCommand.command;
 			  	eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress});
@@ -517,7 +524,7 @@ var setEnv = function(job, callback) {
 			  	scriptRuntime.currentCommand.returnCode = scriptRuntime.currentCommand.output.match(retCodeRE)[0].split(":")[1];
 			  	scriptRuntime.currentCommand.output=scriptRuntime.currentCommand.output.replace(knowhowShellPrompt,"")
 			  		.replace(retCodeRE,"").replace(scriptRuntime.currentCommand.command,"").trim();
-			  	console.log('return code: '+scriptRuntime.currentCommand.returnCode);
+			  	//console.log('return code: '+scriptRuntime.currentCommand.returnCode);
 			  	if (scriptRuntime.currentCommand.returnCode != 0) {
 					//term.write(':\r')
 			  		eventEmitter.emit('execution-error',scriptRuntime.currentCommand);
@@ -585,6 +592,7 @@ var setEnv = function(job, callback) {
 			}
 
 			scriptRuntime.currentCommand = command;
+			scriptRuntime.currentCommand.regEx = new RegExp(scriptRuntime.currentCommand.command.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"),"g")
 			if (command.command) {
 				term.write(command.command+'\r');
 			}

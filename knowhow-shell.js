@@ -48,8 +48,9 @@ var executeJob = function(job, callback) {
 		});
 	term.write('\r');
 	var jobId = job.id+jobCounter++;
-
-	console.log(term.process);
+	if (job.options && job.options.outputToConsole) {
+		console.log(term.process);
+	}
 	var timeoutms = 120000;
 	if (job.options && job.options.timeoutms) {
 		timeoutms = job.options.timeoutms;
@@ -112,6 +113,9 @@ var executeJobAsSubProcess = function(job, callback) {
 	console.log(job);
 	job.callback = callback;
 	var subprocess = cp.fork(__dirname+'/execJob.js',[JSON.stringify(job)]);
+	job.subProcess = subprocess;
+	jobsInProgress[job.id] = job;
+	
 	subprocess.on('exit', function(code, signal) {
 		
 		if (code && code >0) {
@@ -162,7 +166,7 @@ var executeJobAsSubProcess = function(job, callback) {
 				}
 				//delete job.timeout;
 				//delete job.progressCheck;
-				delete job.subprocess;
+				delete job.subProcess;
 				if (job.callback)  {
 					delete job.callback;
 					if (data.output) {
@@ -187,35 +191,6 @@ var executeJobAsSubProcess = function(job, callback) {
 		});
 	};
 	listenForSubProcessEvents(subprocess,events);
-	
-/*
-	var timeoutms = 120000;
-	if (job.options && job.options.timeoutms) {
-		timeoutms = job.options.timeoutms;
-	}
-	job.timeout = setTimeout(function() {
-		//if (progressCheck) {
-		//	clearInterval(progressCheck);
-		//}
-		job.status='Timed out';
-		eventEmitter.emit('job-error',job);
-		
-		if (job.progressCheck) {
-			clearInterval(job.progressCheck);
-		}
-		if (callback) {
-			callback(new Error("timed out: "+job.id), undefined);
-		}
-	},timeoutms);
-	job.progress = 1;
-	job.progressCheck = setInterval(function() {
-		    eventEmitter.emit('job-update',{id: job.id, status: job.status, progress: job.progress++});
-			
-		},5000);*/
-	job.subProcess = subprocess;
-	jobsInProgress[job.id] = job;
-	
-
 	
 
 }
@@ -317,9 +292,25 @@ var executeSingleCommand = function(command, callback) {
 exports.executeSingleCommand = executeSingleCommand;
 
 function KnowhowShell(passedInEmitter) {
+	
+	self = this;
 	if (passedInEmitter) {
 		eventEmitter = passedInEmitter;
 	}
+	self.cancelJob = cancelJob;
+	self.executeJob = executeJob;
+	self.executeJobAsSubProcess = executeJobAsSubProcess;
+	self.executeJobWithPool = executeJobWithPool;
+	self.executeSingleCommand = executeSingleCommand;
+	self.eventEmitter = eventEmitter;
+	self.jobsInProgress = jobsInProgress;
+	self.addListener =
+	self.on = function(type, func) {
+		eventEmitter.on(type, func);
+		return this;
+	};
+	
+	return self;
 }
 
 KnowhowShell.prototype.cancelJob = cancelJob;
