@@ -133,61 +133,65 @@ var executeJobAsSubProcess = function(job, callback) {
 	var listenForSubProcessEvents = function(subProcess, events) {
 		subProcess.on('message', function(data) {
 			var eventType = data.eventType;
-			console.log("eventType="+eventType);
-			console.log(data);
-			if (eventType =='subprocess-complete') {
-				
-				if (job.timeout) {
-					clearTimeout(job.timeout);
-				}
-				if (job.progressCheck) {
-					clearInterval(job.progressCheck);
-				}
-				if (job.subProcess) {
-					job.subProcess.kill('SIGTERM');
-				}
-				//delete job.timeout;
-				//delete job.progressCheck;
-				delete job.subProcess;
-				//eventEmitter.emit("job-complete", data);
-				if (job.callback) {
-					delete job.callback;
-					callback(undefined, data);
-				}
-			} else if (eventType =='execution-error' || eventType =='job-error' || eventType =='job-cancel' ){
-				if (job.timeout) {
-					clearTimeout(job.timeout);
-				}
-				if (job.progressCheck) {
-					clearInterval(job.progressCheck);
-				}
-				if (job.subProcess) {
-					job.subProcess.kill('SIGTERM');
-				}
-				//delete job.timeout;
-				//delete job.progressCheck;
-				delete job.subProcess;
-				if (job.callback)  {
-					delete job.callback;
-					if (data.output) {
-					  callback(new Error("job error: "+data.output), data);
-					 }
-					 else if (data.status) {
-					 	callback(new Error("job error: "+data.status), data);
-					 }
-					 else {
-					 	callback(new Error(job.id+" "+eventType), data);
-					 }
-				}
-			}
-			if (eventType =='execution error') {
-				job.status="ERROR";
-				eventEmitter.emit('job-error', job);
-			}
-			//console.log("eventType="+data.eventType);
+			//console.log("eventType="+eventType);
 			//console.log(data);
-			//delete data.eventType;
-			eventEmitter.emit(eventType, data);
+			try {
+				if (eventType =='subprocess-complete') {
+					
+					if (job.timeout) {
+						clearTimeout(job.timeout);
+					}
+					if (job.progressCheck) {
+						clearInterval(job.progressCheck);
+					}
+					if (job.subProcess) {
+						job.subProcess.kill('SIGTERM');
+					}
+					//delete job.timeout;
+					//delete job.progressCheck;
+					delete job.subProcess;
+					//eventEmitter.emit("job-complete", data);
+					if (job.callback) {
+						delete job.callback;
+						callback(undefined, data);
+					}
+				} else if (eventType =='execution-error' || eventType =='job-error' || eventType =='job-cancel' ){
+					if (job.timeout) {
+						clearTimeout(job.timeout);
+					}
+					if (job.progressCheck) {
+						clearInterval(job.progressCheck);
+					}
+					if (job.subProcess) {
+						job.subProcess.kill('SIGTERM');
+					}
+					//delete job.timeout;
+					//delete job.progressCheck;
+					delete job.subProcess;
+					if (job.callback)  {
+						delete job.callback;
+						if (data.output) {
+						  callback(new Error("job error: "+data.output), data);
+						 }
+						 else if (data.status) {
+						 	callback(new Error("job error: "+data.status), data);
+						 }
+						 else {
+						 	callback(new Error(job.id+" "+eventType), data);
+						 }
+					}
+				}
+				if (eventType =='execution error') {
+					job.status="ERROR";
+					eventEmitter.emit('job-error', job);
+				}
+				//console.log("eventType="+data.eventType);
+				//console.log(data);
+				//delete data.eventType;
+				eventEmitter.emit(eventType, data);
+			} catch (err) {
+				console.log(err);
+			}
 		});
 	};
 	listenForSubProcessEvents(subprocess,events);
